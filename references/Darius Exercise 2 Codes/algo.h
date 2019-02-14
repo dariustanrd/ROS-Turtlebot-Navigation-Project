@@ -15,7 +15,6 @@ typedef std::pair<int,int> coord;
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
-//test
 
 #define GRID_ROW_X_MAX 12
 #define GRID_COL_Y_MAX 8
