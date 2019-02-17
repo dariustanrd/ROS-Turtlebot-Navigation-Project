@@ -7,7 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/darius/ROS_Workspaces/proj1_ws/devel:$CMAKE_PREFIX_PATH"
 export PWD="/home/darius/ROS_Workspaces/proj1_ws/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/darius/ROS_Workspaces/proj1_ws/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/darius/ROS_Workspaces/proj1_ws/src:$ROS_PACKAGE_PATH"

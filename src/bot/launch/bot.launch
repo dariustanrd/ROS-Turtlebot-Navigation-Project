@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="bot" type="pos_info" name="pos_info" ns="manual_ctrl"/>
+    <node pkg="bot" type="depth_info" name="depth_info" ns="manual_ctrl"/>
+    <node pkg="bot" type="bot_control" name="bot_control" ns="manual_ctrl" output="screen"/>
+</launch>
