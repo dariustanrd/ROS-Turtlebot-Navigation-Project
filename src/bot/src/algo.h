@@ -5,6 +5,7 @@
 #include <deque>
 #include <queue>
 #include <set>
+#include <bits/stdc++.h>
 // #include <iomanip>
 // #include <iostream>
 
@@ -22,10 +23,36 @@ typedef std::pair<int,int> coord;
 #define GOAL_ROW_X 4
 #define GOAL_COL_Y 4
 
-// In this map, the start X and Y cannot be 0,0. It is actually 0,6. 
-// Pose in pos_info needs to change to start at 0,6
 #define START_X 0
 #define START_Y 0
+
+coord goalCoord (GOAL_ROW_X, GOAL_COL_Y);
+coord startCoord (START_X,START_Y);
+
+typedef struct{
+    bool wallUp;
+    bool wallDown;
+    bool wallLeft;
+    bool wallRight;
+    
+    coord neighbourUp;
+    coord neighbourDown;
+    coord neighbourLeft;
+    coord neighbourRight;
+    int h;
+    int g;
+    int f;
+    coord previous;
+} cell;
+
+cell grid[GRID_ROW_X_MAX][GRID_COL_Y_MAX];
+
+struct comp{
+    bool operator() (const coord i, const coord j) const{
+        if (grid[i.first][i.second].f < grid[j.first][j.second].f) return i < j;
+        return i < j;
+    }
+};
 
 // WRT starting position X = 0, Y = 0, yaw = 0
 // Goal position = x: 4 y: 4
@@ -59,22 +86,6 @@ coord pathfinder(coord curCoord, coord goalCoord) {
     return nextCoord;
 }
 
-typedef struct{
-    bool wallUp;
-    bool wallDown;
-    bool wallLeft;
-    bool wallRight;
-    
-    coord neighbourUp;
-    coord neighbourDown;
-    coord neighbourLeft;
-    coord neighbourRight;
-    int value; //h
-    int g;
-    // int f;
-    coord previous;
-} cell;
-
 int manhattanDist(coord start, coord end){
     int horiz = abs(start.first - end.first);
     int vert = abs(start.second - end.second);
@@ -83,9 +94,9 @@ int manhattanDist(coord start, coord end){
 
 class pathfinderAlgo{
   private:
-    std::set<coord> openSet; //TODO: implement custom comparator sort by lowest f
+    std::set<coord, comp> openSet; //TODO: check custom comparator sort by lowest f FIXME: this doesnt work.
     std::set<coord> closeSet;
-    cell grid[GRID_ROW_X_MAX][GRID_COL_Y_MAX];
+    
     // coord goalCoord;
 
   public:
@@ -166,44 +177,48 @@ class pathfinderAlgo{
     //TODO: Code aStar algo
     coord aStar(coord pointCoord){
         //full algo
-        // coord currentCoord;
-        // openSet.insert(pointCoord);
+        coord currentCoord;
+        coord tempCoord; //FIXME: temp coord for path retrace
+        openSet.insert(pointCoord);
 
-        // grid[pointCoord.first][pointCoord.second].g = 0;
-        // grid[pointCoord.first][pointCoord.second].value = manhattanDist(startCoord, goalCoord);
-        // while(!openSet.empty()) {
+        grid[pointCoord.first][pointCoord.second].g = 0;
+        grid[pointCoord.first][pointCoord.second].h = manhattanDist(pointCoord, goalCoord);
+        grid[pointCoord.first][pointCoord.second].f = grid[pointCoord.first][pointCoord.second].h + grid[pointCoord.first][pointCoord.second].g;
+        while(!openSet.empty()) {
             
             // currentCoord = lowest value f in openset;
+            std::set<coord>::iterator it = openSet.begin();
+            currentCoord = std::make_pair(it->first, it->second);
+            
+            if (currentCoord == goalCoord) return tempCoord; // - retrace path back to pointCoord, give next coord;
 
-            // if (currentCoord == goalCoord) return - retrace path back to pointCoord, give next coord;
+            openSet.erase(openSet.find(currentCoord)); // remove currentCoord from openSet
+            closeSet.insert(currentCoord);
 
-            // openSet.erase(openSet.find(currentCoord)); // remove currentCoord from openSet
-            // closeSet.insert(currentCoord);
+            cell spot = grid[currentCoord.first][currentCoord.second];
 
-            // cell spot = grid[currentCoord.first][currentCoord.second];
-
-            //for all neighbours
+            // for all neighbours
             // Up neighbour
-            // if(!closeSet.count(spot.neighbourUp) && !spot.wallUp) {
-            //     int temp = spot.g + manhattanDist(currentCoord, spot.neighbourUp);
-            //     bool newPath = false;
-            //     if (openSet.count(spot.neighbourUp)) {
-            //         if (temp < grid[spot.neighbourUp.first][spot.neighbourUp.second].g) {
-            //             grid[spot.neighbourUp.first][spot.neighbourUp.second].g = temp;
-            //             newPath = true;
-            //         }
-            //     } else {
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].g = temp;
-            //         newPath = true;
-            //         openSet.insert(spot.neighbourUp);
-            //     }
-            //     if (newPath) {
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].h = manhattanDist(spot.neighbourUp, goalCoord);
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].f = grid[spot.neighbourUp.first][spot.neighbourUp.second].g + grid[spot.neighbourUp.first][spot.neighbourUp.second].h;
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].previous = currentCoord;
-            //     }
-            // }
-        // }
+            if(!closeSet.count(spot.neighbourUp) && !spot.wallUp) {
+                int temp = spot.g + manhattanDist(currentCoord, spot.neighbourUp);
+                bool newPath = false;
+                if (openSet.count(spot.neighbourUp)) {
+                    if (temp < grid[spot.neighbourUp.first][spot.neighbourUp.second].g) {
+                        grid[spot.neighbourUp.first][spot.neighbourUp.second].g = temp;
+                        newPath = true;
+                    }
+                } else {
+                    grid[spot.neighbourUp.first][spot.neighbourUp.second].g = temp;
+                    newPath = true;
+                    openSet.insert(spot.neighbourUp);
+                }
+                if (newPath) {
+                    grid[spot.neighbourUp.first][spot.neighbourUp.second].h = manhattanDist(spot.neighbourUp, goalCoord);
+                    grid[spot.neighbourUp.first][spot.neighbourUp.second].f = grid[spot.neighbourUp.first][spot.neighbourUp.second].g + grid[spot.neighbourUp.first][spot.neighbourUp.second].h;
+                    grid[spot.neighbourUp.first][spot.neighbourUp.second].previous = currentCoord;
+                }
+            }
+        }
     }
 
 };

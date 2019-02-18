@@ -20,7 +20,6 @@
 //	|						//      +       -
 //  ------> X				//      3.14 -3.14
 
-
 static const double MIN_DEPTH = 0.40;
 static const double PI = 3.1415;
 static const double ANG_ERR = 0.1;
@@ -29,9 +28,6 @@ static const double DEPTH_LIM = 0.7;
 static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
 static const double YAW_VEL = 0.5;
-
-coord goalCoord (GOAL_ROW_X, GOAL_COL_Y);
-coord startCoord (START_X,START_Y);
 
 int myRound (double num) {
     int out = 0;
