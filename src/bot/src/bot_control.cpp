@@ -23,7 +23,8 @@
 static const double MIN_DEPTH = 0.40;
 static const double PI = 3.1415;
 static const double ANG_ERR = 0.1;
-static const double DEPTH_LIM = 0.7;
+// static const double DEPTH_LIM = 0.7;
+static const double DEPTH_LIM = 0.7; // with aStar need to increase?
 
 static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
@@ -73,6 +74,7 @@ class BotController
         curCoord = startCoord;
         algo = pathfinderAlgo();
         nextCoord = algo.aStar(startCoord);
+        // nextCoord = startCoord;
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
         pose_sub = nh.subscribe("pos_info", 1, &BotController::poseCallback, this);
@@ -81,7 +83,7 @@ class BotController
     }
     void depthCallback(const std_msgs::Float64::ConstPtr& depth_data) {
         depth = depth_data -> data;
-        if (isnan(depth)) {
+        if (std::isnan(depth)) {
             depth = MIN_DEPTH;
         }
         // std::cout << "depth: " << depth << std::endl;
@@ -100,29 +102,29 @@ class BotController
                 linear_cmd = 0;
                 break;
             case UP:
-                // if current pos X - start pos X < MOVE_DIST : move
-                if (posX - initX < MOVE_DIST) {
+                // if current pos Y - start pos Y < MOVE_DIST : move
+                if (posY - initY < MOVE_DIST) {
                     linear_cmd = LIN_VEL;
                     std::cout << "Straight UP" << std::endl;
                 } 
                 break;
             case DOWN:
-                // if start pos X - current pos X < MOVE_DIST : move
-                if (initX - posX < MOVE_DIST) {
+                // if start pos Y - current pos Y < MOVE_DIST : move
+                if (initY - posY < MOVE_DIST) {
                     linear_cmd = LIN_VEL;
                     std::cout << "Straight DOWN" << std::endl;
                 } 
                 break;
             case LEFT:
-                // if current pos Y - start pos Y < MOVE_DIST : move
-                if (posY - initY < MOVE_DIST) {
+                // if start pos X - current pos X < MOVE_DIST : move
+                if (initX - posX < MOVE_DIST) {
                     linear_cmd = LIN_VEL;
                     std::cout << "Straight LEFT" << std::endl;
                 } 
                 break;
             case RIGHT:
-                // if start pos Y - current pos Y < MOVE_DIST : move
-                if (initY - posY < MOVE_DIST) {
+                // if current pos X - start pos X < MOVE_DIST : move
+                if (posX - initX < MOVE_DIST) {
                     linear_cmd = LIN_VEL;
                     std::cout << "Straight RIGHT" << std::endl;
                 } 
@@ -265,7 +267,7 @@ class BotController
         }
         // curCoord = getCoord(posX, posY);
         int nextStep;
-        //TODO: Add reset maze grid values / g value here?
+        algo.resetGrid();
 
         // if (curCoord == goalCoord) {
         // if (goalCoord.first == posX && goalCoord.second == posY) {
@@ -302,10 +304,10 @@ class BotController
                 moveStr(nextStep);
             } else {
                 std::cout << "Path Blocked Path Blocked Path Blocked Path Blocked Path Blocked" << std::endl;
-                // moveStr(STOP);
-                moveStr(nextStep); // continue moving to the coordinate
-                // TODO: update wall here
-                algo.updateWall(nextCoord, nextStep); //update astar algo with wall at nextCoord
+                moveStr(STOP); //with aStar should stop? but should continue to the intended coord if not yet there?
+                // moveStr(nextStep); // continue moving to the coordinate
+                algo.updateWall(curCoord, nextStep); //update astar algo with wall
+                nextCoord = algo.aStar(curCoord); // get updated nextCoord
             }
 
         }

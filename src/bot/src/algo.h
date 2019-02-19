@@ -5,7 +5,10 @@
 #include <deque>
 #include <queue>
 #include <set>
-#include <bits/stdc++.h>
+#include <unordered_set>
+#include <boost/unordered_set.hpp>
+// #include <boost/functional/hash.hpp>
+#include <math.h>
 // #include <iomanip>
 // #include <iostream>
 
@@ -31,6 +34,8 @@ coord startCoord (START_X,START_Y);
 coord OBCoord (-1,-1);
 
 typedef struct{
+    coord pos;
+
     bool wallUp;
     bool wallDown;
     bool wallLeft;
@@ -48,14 +53,20 @@ typedef struct{
 
 cell grid[GRID_ROW_X_MAX][GRID_COL_Y_MAX];
 
+int numRow = GRID_ROW_X_MAX;
+int numCol = GRID_COL_Y_MAX;
+
 struct comp{
-    bool operator() (coord i, coord j) const{
-        if (grid[i.first][i.second].f < grid[j.first][j.second].f) return true;
+    bool operator() (const coord i = OBCoord, const coord j = OBCoord) const{
+        if (i == OBCoord || j == OBCoord)
+            return false;
+        if (grid[i.first][i.second].f < grid[j.first][j.second].f)
+            return true;
         else return false;
     }
 };
-std::set<coord, comp> openSet;
-std::set<coord> closeSet;
+// std::set<coord, comp> openSet;
+// std::set<coord> closeSet;
 // WRT starting position X = 0, Y = 0, yaw = 0
 // Goal position = x: 4 y: 4
 // Positive pose on map:	Yaw orientation on map:
@@ -97,28 +108,23 @@ int manhattanDist(coord start, coord end){
 class pathfinderAlgo{
   private:
     // std::set<coord, comp> openSet; //TODO: check custom comparator sort by lowest f
-    // std::set<coord> closeSet;
-    
+    boost::unordered_set<coord> openSet;
+    boost::unordered_set<coord> closeSet;
     // coord goalCoord;
-
   public:
     // Constructor
     pathfinderAlgo() {
-        int numRow = GRID_ROW_X_MAX;
-        int numCol = GRID_COL_Y_MAX;
-
         // goalCoord = std::make_pair(GOAL_ROW_X, GOAL_COL_Y);
-
         closeSet.clear();
         openSet.clear();
-        
         //create grid
         for (int i = 0; i < numRow; ++i) {
             for (int j = 0; j < numCol; ++j) {
                 // Row - i - X 
                 // Col - j - Y
+                grid[i][j].pos = std::make_pair(i,j);
 
-                if (i == numRow-1)
+                if (i == numRow - 1)
                     grid[i][j].wallRight = true; //right of cell is wall
                 if (i == 0)
                     grid[i][j].wallLeft = true; //left of cell is wall
@@ -128,29 +134,49 @@ class pathfinderAlgo{
                     grid[i][j].wallDown = true; //bottom of cell is wall
 
                 // Neighbours of that cell
-                grid[i][j].neighbourUp = std::make_pair(i + 1, j);
-                grid[i][j].neighbourDown = std::make_pair(i - 1, j);
-                grid[i][j].neighbourLeft = std::make_pair(i, j - 1);
-                grid[i][j].neighbourRight = std::make_pair(i, j + 1);
+                grid[i][j].neighbourUp = std::make_pair(i, j + 1);
+                grid[i][j].neighbourDown = std::make_pair(i, j - 1);
+                grid[i][j].neighbourLeft = std::make_pair(i - 1, j);
+                grid[i][j].neighbourRight = std::make_pair(i + 1, j);
                 
-                //Top OB
-                if (i == numRow-1)
-                    grid[i][j].neighbourUp = OBCoord;
-                //Bottom OB
-                if (i == 0)
-                    grid[i][j].neighbourDown = OBCoord;
-                //Left OB
-                if (j == numCol-1)
-                    grid[i][j].neighbourLeft = OBCoord;
                 //Right OB
-                if (j == 0) 
+                if (i == numRow-1)
                     grid[i][j].neighbourRight = OBCoord;
+                //Left OB
+                if (i == 0)
+                    grid[i][j].neighbourLeft = OBCoord;
+                //Up OB
+                if (j == numCol-1)
+                    grid[i][j].neighbourUp = OBCoord;
+                //Down OB
+                if (j == 0) 
+                    grid[i][j].neighbourDown = OBCoord;
 
                 grid[i][j].previous = std::make_pair(0, 0);
+
+                //FIXME: check my g values, the g score is wrong.
+                grid[i][j].g = 1;
+                grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
+                grid[i][j].f = grid[i][j].g + grid[i][j].h;
             }
         }
     }
-    
+
+    void resetGrid() {
+        closeSet.clear();
+        openSet.clear();
+        for (int i = 0; i < numRow; ++i) {
+            for (int j = 0; j < numCol; ++j) {
+                grid[i][j].previous = std::make_pair(0, 0);
+
+                //FIXME: check my g values, the g score is wrong.
+                grid[i][j].g = 1;
+                grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
+                grid[i][j].f = grid[i][j].g + grid[i][j].h;
+            }
+        }
+    }
+
     void updateWall(coord curCoord, int wallDirection){
         //update grid with wall
         int row = curCoord.first; //x
@@ -159,19 +185,19 @@ class pathfinderAlgo{
         switch (wallDirection){
 		case UP:
             grid[row][col].wallUp = true;
-            grid[row + 1][col].wallDown = true;
+            grid[row][col+1].wallDown = true;
 		break;
 		case DOWN:
             grid[row][col].wallDown = true;
-            grid[row - 1][col].wallUp = true;
+            grid[row][col-1].wallUp = true;
 		break;
         case LEFT:
             grid[row][col].wallLeft = true;
-            grid[row][col - 1].wallRight = true;
+            grid[row-1][col].wallRight = true;
 		break;
 		case RIGHT:
             grid[row][col].wallRight = true;
-            grid[row][col + 1].wallLeft = true;
+            grid[row+1][col].wallLeft = true;
 		break;
 	    }
     }
@@ -192,15 +218,19 @@ class pathfinderAlgo{
         std::cout << "Start AStar" << std::endl;
         coord currentCoord, nextCoord;
         openSet.insert(pointCoord);
+        std::cout << "Inserted pointCoord to openSet: " << pointCoord.first << " " << pointCoord.second << std::endl;
 
         grid[pointCoord.first][pointCoord.second].g = 0;
         grid[pointCoord.first][pointCoord.second].h = manhattanDist(pointCoord, goalCoord);
         grid[pointCoord.first][pointCoord.second].f = grid[pointCoord.first][pointCoord.second].h + grid[pointCoord.first][pointCoord.second].g;
         while(!openSet.empty()) {
-            
+            std::cout << "In while openSet empty loop" << std::endl;
             // currentCoord = lowest value f in openset;
-            std::set<coord>::iterator it = openSet.begin();
+
+            //FIXME: NEED TO IMPLEMENT SORTING CODE FOR LOWEST F
+            auto it = openSet.begin();
             currentCoord = std::make_pair(it->first, it->second);
+            std::cout << "Current coord with lowest f: " << currentCoord.first << " " << currentCoord.second << std::endl;
             
             if (currentCoord == goalCoord) {
                 std::cout << "Found Path" << std::endl;
@@ -210,51 +240,63 @@ class pathfinderAlgo{
             }
 
             openSet.erase(openSet.find(currentCoord)); // remove currentCoord from openSet
+            std::cout << "Erased current coord in openSet" << std::endl;
             closeSet.insert(currentCoord);
+            std::cout << "Insert current coord in closeSet" << std::endl;
 
             cell spot = grid[currentCoord.first][currentCoord.second];
-
-            // for all neighbours
-            // bool flag[4] = {false};
-            // if (spot.neighbourUp != OBCoord)
-            //     neighbours[0] = spot.neighbourUp;
-            // else flag[0] = true;
-            // if (spot.neighbourDown != OBCoord)
-            //     neighbours[1] = spot.neighbourDown;
-            // else flag[1] = true;
-            // if (spot.neighbourLeft != OBCoord)
-            //     neighbours[2] = spot.neighbourLeft;
-            // else flag[2] = true;
-            // if (spot.neighbourRight != OBCoord)
-            //     neighbours[3] = spot.neighbourRight;
-            // else flag[3] = true;
-
-            //FIXME: I KEEP GETTING SEGMENTATION FAULTS
             
             coord neighbours[4];
             neighbours[0] = spot.neighbourUp;
             neighbours[1] = spot.neighbourDown;
             neighbours[2] = spot.neighbourLeft;
             neighbours[3] = spot.neighbourRight;
-            //FIXME: must make sure the spot coord are within the grid! if not will mess up
             for (int i = 0; i < 4; ++i) {
-                if (i == 0 && spot.wallUp) continue;
-                if (i == 1 && spot.wallDown) continue;
-                if (i == 2 && spot.wallLeft) continue;
-                if (i == 3 && spot.wallRight) continue;
+                std::cout << "In for neighbours loop: " << i << std::endl;
+                if ((i == 0) && ((spot.wallUp) || (spot.neighbourUp == OBCoord))) {
+                    std::cout << "Invalid UP" << std::endl;
+                    continue;
+                }
+                if ((i == 1) && ((spot.wallDown) || (spot.neighbourDown == OBCoord))) {
+                    std::cout << "Invalid DOWN" << std::endl;
+                    continue;
+                }
+                if ((i == 2) && ((spot.wallLeft) || (spot.neighbourLeft == OBCoord))) {
+                    std::cout << "Invalid LEFT" << std::endl;
+                    continue;
+                }
+                if ((i == 3) && ((spot.wallRight) || (spot.neighbourRight == OBCoord))) {
+                    std::cout << "Invalid RIGHT" << std::endl;
+                    continue;
+                }
+                std::cout << "Current open set: " << std::endl;
+                for (auto it2 = openSet.begin(); it2 != openSet.end(); ++it2) {
+                    std::cout << it2->first << " " << it2->second << std::endl;
+                }
                 if(!closeSet.count(neighbours[i])) {
                     //FIXME: check my g values, the g score is wrong.
                     int temp = spot.g + manhattanDist(currentCoord, neighbours[i]);
                     bool newPath = false;
-                    if (openSet.count(neighbours[i])) {
+                    std::cout << "Neighbour coord: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
+                    if (openSet.find(neighbours[i]) != openSet.end()) {
+                        std::cout << "Neighbour found in openSet: " <<  neighbours[i].first << " " << neighbours[i].second  << std::endl;
                         if (temp < grid[neighbours[i].first][neighbours[i].second].g) {
+                            std::cout << "Current f score < neighbour g score" << std::endl;
                             grid[neighbours[i].first][neighbours[i].second].g = temp;
                             newPath = true;
+                        } else {
+                            std::cout << "Current f score > neighbour g score" << std::endl;
                         }
                     } else {
+                        std::cout << "Neighbour not found in openSet" << std::endl;
                         grid[neighbours[i].first][neighbours[i].second].g = temp;
                         newPath = true;
                         openSet.insert(neighbours[i]);
+                        std::cout << "Inserted neighbour direction " << i <<" to openSet: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
+                        std::cout << "Current open set: " << std::endl;
+                        for (auto it3 = openSet.begin(); it3 != openSet.end(); ++it3) {
+                            std::cout << it3->first << " " << it3->second << std::endl;
+                        }
                     }
                     if (newPath) {
                         grid[neighbours[i].first][neighbours[i].second].h = manhattanDist(neighbours[i], goalCoord);
@@ -263,91 +305,6 @@ class pathfinderAlgo{
                     }
                 }
             }
-
-            // // Up neighbour
-            // if(!closeSet.count(spot.neighbourUp) && !spot.wallUp && spot.neighbourUp != std::make_pair(-1,-1)) {
-            //     int temp = spot.g + manhattanDist(currentCoord, spot.neighbourUp);
-            //     bool newPath = false;
-            //     if (openSet.count(spot.neighbourUp)) {
-            //         if (temp < grid[spot.neighbourUp.first][spot.neighbourUp.second].g) {
-            //             grid[spot.neighbourUp.first][spot.neighbourUp.second].g = temp;
-            //             newPath = true;
-            //         }
-            //     } else {
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].g = temp;
-            //         newPath = true;
-            //         openSet.insert(spot.neighbourUp);
-            //     }
-            //     if (newPath) {
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].h = manhattanDist(spot.neighbourUp, goalCoord);
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].f = grid[spot.neighbourUp.first][spot.neighbourUp.second].g + grid[spot.neighbourUp.first][spot.neighbourUp.second].h;
-            //         grid[spot.neighbourUp.first][spot.neighbourUp.second].previous = currentCoord;
-            //     }
-            // }
-
-            // // Down neighbour
-            // if(!closeSet.count(spot.neighbourDown) && !spot.wallDown && spot.neighbourDown != std::make_pair(-1,-1)) {
-            //     int temp = spot.g + manhattanDist(currentCoord, spot.neighbourDown);
-            //     bool newPath = false;
-            //     if (openSet.count(spot.neighbourDown)) {
-            //         if (temp < grid[spot.neighbourDown.first][spot.neighbourDown.second].g) {
-            //             grid[spot.neighbourDown.first][spot.neighbourDown.second].g = temp;
-            //             newPath = true;
-            //         }
-            //     } else {
-            //         grid[spot.neighbourDown.first][spot.neighbourDown.second].g = temp;
-            //         newPath = true;
-            //         openSet.insert(spot.neighbourDown);
-            //     }
-            //     if (newPath) {
-            //         grid[spot.neighbourDown.first][spot.neighbourDown.second].h = manhattanDist(spot.neighbourDown, goalCoord);
-            //         grid[spot.neighbourDown.first][spot.neighbourDown.second].f = grid[spot.neighbourDown.first][spot.neighbourDown.second].g + grid[spot.neighbourDown.first][spot.neighbourDown.second].h;
-            //         grid[spot.neighbourDown.first][spot.neighbourDown.second].previous = currentCoord;
-            //     }
-            // }
-
-            // // Left neighbour
-            // if(!closeSet.count(spot.neighbourLeft) && !spot.wallLeft && spot.neighbourLeft != std::make_pair(-1,-1)) {
-            //     int temp = spot.g + manhattanDist(currentCoord, spot.neighbourLeft);
-            //     bool newPath = false;
-            //     if (openSet.count(spot.neighbourLeft)) {
-            //         if (temp < grid[spot.neighbourLeft.first][spot.neighbourLeft.second].g) {
-            //             grid[spot.neighbourLeft.first][spot.neighbourLeft.second].g = temp;
-            //             newPath = true;
-            //         }
-            //     } else {
-            //         grid[spot.neighbourLeft.first][spot.neighbourLeft.second].g = temp;
-            //         newPath = true;
-            //         openSet.insert(spot.neighbourLeft);
-            //     }
-            //     if (newPath) {
-            //         grid[spot.neighbourLeft.first][spot.neighbourLeft.second].h = manhattanDist(spot.neighbourLeft, goalCoord);
-            //         grid[spot.neighbourLeft.first][spot.neighbourLeft.second].f = grid[spot.neighbourLeft.first][spot.neighbourLeft.second].g + grid[spot.neighbourLeft.first][spot.neighbourLeft.second].h;
-            //         grid[spot.neighbourLeft.first][spot.neighbourLeft.second].previous = currentCoord;
-            //     }
-            // }
-
-            // // Right neighbour
-            // if(!closeSet.count(spot.neighbourRight) && !spot.wallRight && spot.neighbourRight != std::make_pair(-1,-1)) {
-            //     int temp = spot.g + manhattanDist(currentCoord, spot.neighbourRight);
-            //     bool newPath = false;
-            //     if (openSet.count(spot.neighbourRight)) {
-            //         if (temp < grid[spot.neighbourRight.first][spot.neighbourRight.second].g) {
-            //             grid[spot.neighbourRight.first][spot.neighbourRight.second].g = temp;
-            //             newPath = true;
-            //         }
-            //     } else {
-            //         grid[spot.neighbourRight.first][spot.neighbourRight.second].g = temp;
-            //         newPath = true;
-            //         openSet.insert(spot.neighbourRight);
-            //     }
-            //     if (newPath) {
-            //         grid[spot.neighbourRight.first][spot.neighbourRight.second].h = manhattanDist(spot.neighbourRight, goalCoord);
-            //         grid[spot.neighbourRight.first][spot.neighbourRight.second].f = grid[spot.neighbourRight.first][spot.neighbourRight.second].g + grid[spot.neighbourRight.first][spot.neighbourRight.second].h;
-            //         grid[spot.neighbourRight.first][spot.neighbourRight.second].previous = currentCoord;
-            //     }
-            // }
-
         }
     }
 
