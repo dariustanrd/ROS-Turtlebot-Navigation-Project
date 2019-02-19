@@ -71,8 +71,9 @@ class BotController
         linear_cmd = 0;
         yaw_cmd = 0;
         curCoord = startCoord;
-        nextCoord = pathfinder(startCoord, goalCoord);
         algo = pathfinderAlgo();
+        nextCoord = algo.aStar(startCoord);
+
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
         pose_sub = nh.subscribe("pos_info", 1, &BotController::poseCallback, this);
         cmd_pub = nh.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity",1);
@@ -282,8 +283,8 @@ class BotController
             if (checkBotReached(posX,posY,nextCoord)) { //have reached next step. Get next coord.
                 //give current coord, goal coord to pathfinder, pathfinder return next coord
                 curCoord = getCoord(posX, posY);
-                nextCoord = pathfinder(curCoord, goalCoord); //FIXME: this is for testing only
-                // nextCoord = algo.aStar(curCoord); //TODO: use aStar algo to get the nextCoord
+                // nextCoord = pathfinder(curCoord, goalCoord); //FIXME: this is for testing only
+                nextCoord = algo.aStar(curCoord); //TODO: use aStar algo to get the nextCoord
                 std::cout << "Next Coord" << std::endl;
                 movedFlag = true;
             }
