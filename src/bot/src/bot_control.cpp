@@ -30,23 +30,27 @@ static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
 static const double YAW_VEL = 0.4;
 
-int myRound (double num) {
-    int out = 0;
-    if (num >= 0) {
-        if (num - int(num) >= 0.7) {
-            out = int(num);
-            out++;
-            return out;
-        } else return int(num);
-    } else if (num < 0) {
-        double tmp = -num;
-        if (tmp - int(tmp) >= 0.7) {
-            out = int(num);
-            out--;
-            return out;
-        } else return int(num);
-    }
-}
+// int myRound (double num) {
+//     int out = 0;
+//     if (num >= 0) {
+//         if (num - int(num) >= 0.7) {
+//             out = int(num);
+//             out++;
+//             return out;
+//         } else return int(num);
+//     } else if (num < 0) {
+//         double tmp = -num;
+//         if (tmp - int(tmp) >= 0.7) {
+//             out = int(num);
+//             out--;
+//             return out;
+//         } else return int(num);
+//     }
+// }
+
+//FIXME: 
+// Need to be edited, currently the motion is not accurate enough 
+// which causes the bot to drift!
 
 class BotController
 {
@@ -270,7 +274,6 @@ class BotController
         algo.resetGrid();
 
         // if (curCoord == goalCoord) {
-        // if (goalCoord.first == posX && goalCoord.second == posY) {
         if (checkBotReached(posX,posY,goalCoord)) {
             ros::Time goalReached = ros::Time::now();
             ros::Duration timeGoal = goalReached - begin;
@@ -281,12 +284,11 @@ class BotController
             std::cout << "Time Taken: " << timeGoalSec << std::endl;
         } else {
             // if (curCoord == nextCoord) { //have reached next step. Get next coord.
-            // if (nextCoord.first == posX && nextCoord.second == posY) { //have reached next step. Get next coord.
             if (checkBotReached(posX,posY,nextCoord)) { //have reached next step. Get next coord.
                 //give current coord, goal coord to pathfinder, pathfinder return next coord
                 curCoord = getCoord(posX, posY);
-                // nextCoord = pathfinder(curCoord, goalCoord); //FIXME: this is for testing only
-                nextCoord = algo.aStar(curCoord); //TODO: use aStar algo to get the nextCoord
+                // nextCoord = pathfinder(curCoord, goalCoord); //this is for testing only
+                nextCoord = algo.aStar(curCoord); //use aStar algo to get the nextCoord
                 std::cout << "Next Coord" << std::endl;
                 movedFlag = true;
             }
@@ -304,6 +306,7 @@ class BotController
                 moveStr(nextStep);
             } else {
                 std::cout << "Path Blocked Path Blocked Path Blocked Path Blocked Path Blocked" << std::endl;
+                //FIXME: Check this
                 if (checkBotReached(posX,posY,nextCoord)){ //if reached
                     moveStr(STOP); //with aStar should stop? but should continue to the intended coord if not yet there?
                 } else {

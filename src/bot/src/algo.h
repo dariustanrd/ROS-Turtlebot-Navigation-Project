@@ -56,17 +56,6 @@ cell grid[GRID_ROW_X_MAX][GRID_COL_Y_MAX];
 int numRow = GRID_ROW_X_MAX;
 int numCol = GRID_COL_Y_MAX;
 
-struct comp{
-    bool operator() (const coord i = OBCoord, const coord j = OBCoord) const{
-        if (i == OBCoord || j == OBCoord)
-            return false;
-        if (grid[i.first][i.second].f < grid[j.first][j.second].f)
-            return true;
-        else return false;
-    }
-};
-// std::set<coord, comp> openSet;
-// std::set<coord> closeSet;
 // WRT starting position X = 0, Y = 0, yaw = 0
 // Goal position = x: 4 y: 4
 // Positive pose on map:	Yaw orientation on map:
@@ -76,10 +65,10 @@ struct comp{
 //	|						//      +       -
 //  ------> X				//      3.14 -3.14
 
-// This function is to test the moving grid motion.
+// This function is to test the moving grid motion for World 1.
 coord pathfinder(coord curCoord, coord goalCoord) {
     coord nextCoord;
-    // try hardcoding to goal
+    //Hardcoding to goal
     if (curCoord.first == 0 && curCoord.second == 0) 
         nextCoord = std::make_pair(0,1);
     else if (curCoord.first == 0 && curCoord.second == 1) 
@@ -107,14 +96,11 @@ int manhattanDist(coord start, coord end){
 
 class pathfinderAlgo{
   private:
-    // std::set<coord, comp> openSet; //TODO: check custom comparator sort by lowest f
     boost::unordered_set<coord> openSet;
     boost::unordered_set<coord> closeSet;
-    // coord goalCoord;
   public:
     // Constructor
     pathfinderAlgo() {
-        // goalCoord = std::make_pair(GOAL_ROW_X, GOAL_COL_Y);
         closeSet.clear();
         openSet.clear();
         //create grid
@@ -154,7 +140,7 @@ class pathfinderAlgo{
 
                 grid[i][j].previous = std::make_pair(0, 0);
 
-                //FIXME: check my g values, the g score is wrong.
+                //FIXME: check g/f value comparison
                 grid[i][j].g = 1;
                 grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
                 grid[i][j].f = grid[i][j].g + grid[i][j].h;
@@ -169,7 +155,7 @@ class pathfinderAlgo{
             for (int j = 0; j < numCol; ++j) {
                 grid[i][j].previous = std::make_pair(0, 0);
 
-                //FIXME: check my g values, the g score is wrong.
+                //FIXME: check g/f value comparison
                 grid[i][j].g = 1;
                 grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
                 grid[i][j].f = grid[i][j].g + grid[i][j].h;
@@ -222,7 +208,7 @@ class pathfinderAlgo{
         }
         return lowest;
     }
-    //TODO: Code aStar algo
+    
     coord aStar(coord pointCoord){
         //full algo
         std::cout << "Start AStar" << std::endl;
@@ -235,9 +221,8 @@ class pathfinderAlgo{
         grid[pointCoord.first][pointCoord.second].f = grid[pointCoord.first][pointCoord.second].h + grid[pointCoord.first][pointCoord.second].g;
         while(!openSet.empty()) {
             std::cout << "In while openSet empty loop" << std::endl;
-            // currentCoord = lowest value f in openset;
-
-            //FIXME: NEED TO IMPLEMENT SORTING CODE FOR LOWEST F
+            
+            // currentCoord = lowest value f in openset
             currentCoord = lowestF();
             std::cout << "Current coord with lowest f: " << currentCoord.first << " " << currentCoord.second << std::endl;
             
@@ -283,12 +268,13 @@ class pathfinderAlgo{
                     std::cout << it2->first << " " << it2->second << std::endl;
                 }
                 if(!closeSet.count(neighbours[i])) {
-                    //FIXME: check my g values, the g score is wrong.
+                    //FIXME: check g/f value comparison
                     int temp = spot.g + manhattanDist(currentCoord, neighbours[i]);
                     bool newPath = false;
                     std::cout << "Neighbour coord: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
                     if (openSet.find(neighbours[i]) != openSet.end()) {
                         std::cout << "Neighbour found in openSet: " <<  neighbours[i].first << " " << neighbours[i].second  << std::endl;
+                        //FIXME: check g/f value comparison
                         if (temp < grid[neighbours[i].first][neighbours[i].second].g) {
                             std::cout << "Current f score < neighbour g score" << std::endl;
                             grid[neighbours[i].first][neighbours[i].second].g = temp;
