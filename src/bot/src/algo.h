@@ -211,7 +211,17 @@ class pathfinderAlgo{
         }
         return next;
     }
-
+    coord lowestF() {
+        coord lowest;
+        int temp = 1000;
+        for (auto it = openSet.begin(); it != openSet.end(); ++it) {
+            if (grid[it->first][it->second].f < temp) {
+                temp = grid[it->first][it->second].f;
+                lowest = *it;
+            }
+        }
+        return lowest;
+    }
     //TODO: Code aStar algo
     coord aStar(coord pointCoord){
         //full algo
@@ -228,8 +238,7 @@ class pathfinderAlgo{
             // currentCoord = lowest value f in openset;
 
             //FIXME: NEED TO IMPLEMENT SORTING CODE FOR LOWEST F
-            auto it = openSet.begin();
-            currentCoord = std::make_pair(it->first, it->second);
+            currentCoord = lowestF();
             std::cout << "Current coord with lowest f: " << currentCoord.first << " " << currentCoord.second << std::endl;
             
             if (currentCoord == goalCoord) {

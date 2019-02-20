@@ -24,11 +24,11 @@ static const double MIN_DEPTH = 0.40;
 static const double PI = 3.1415;
 static const double ANG_ERR = 0.1;
 // static const double DEPTH_LIM = 0.7;
-static const double DEPTH_LIM = 0.7; // with aStar need to increase?
+static const double DEPTH_LIM = 0.5; // with aStar need to decrease?
 
 static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
-static const double YAW_VEL = 0.5;
+static const double YAW_VEL = 0.4;
 
 int myRound (double num) {
     int out = 0;
@@ -247,8 +247,8 @@ class BotController
     }
 
     bool checkBotReached(double x, double y, coord destCoord) {
-        if ((x <= destCoord.first + 0.05) && (x >= destCoord.first - 0.05)) { // if cur x position within +- 0.05 of destination x coord
-            if ((y <= destCoord.second + 0.05) && (y >= destCoord.second - 0.05)) { // if cur x position within +- 0.05 of destination y coord
+        if ((x <= destCoord.first + 0.1) && (x >= destCoord.first - 0.1)) { // if cur x position within +- 0.1 of destination x coord
+            if ((y <= destCoord.second + 0.1) && (y >= destCoord.second - 0.1)) { // if cur x position within +- 0.1 of destination y coord
                 return true;
             }
         }
@@ -304,8 +304,12 @@ class BotController
                 moveStr(nextStep);
             } else {
                 std::cout << "Path Blocked Path Blocked Path Blocked Path Blocked Path Blocked" << std::endl;
-                moveStr(STOP); //with aStar should stop? but should continue to the intended coord if not yet there?
-                // moveStr(nextStep); // continue moving to the coordinate
+                if (checkBotReached(posX,posY,nextCoord)){ //if reached
+                    moveStr(STOP); //with aStar should stop? but should continue to the intended coord if not yet there?
+                } else {
+                    moveStr(nextStep); // continue moving to the coordinate
+                }
+                curCoord = getCoord(posX, posY);
                 algo.updateWall(curCoord, nextStep); //update astar algo with wall
                 nextCoord = algo.aStar(curCoord); // get updated nextCoord
             }
