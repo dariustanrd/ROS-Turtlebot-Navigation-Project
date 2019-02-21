@@ -24,29 +24,32 @@ static const double MIN_DEPTH = 0.40;
 static const double PI = 3.1415;
 static const double ANG_ERR = 0.1;
 // static const double DEPTH_LIM = 0.7;
-static const double DEPTH_LIM = 0.5; // with aStar need to decrease?
+static const double DEPTH_LIM = 0.5;
+
+static const double POSE_TOLERANCE = 0.1;
 
 static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
 static const double YAW_VEL = 0.4;
+static const double YAW_VEL_CORRECTION = 0.1;
 
-// int myRound (double num) {
-//     int out = 0;
-//     if (num >= 0) {
-//         if (num - int(num) >= 0.7) {
-//             out = int(num);
-//             out++;
-//             return out;
-//         } else return int(num);
-//     } else if (num < 0) {
-//         double tmp = -num;
-//         if (tmp - int(tmp) >= 0.7) {
-//             out = int(num);
-//             out--;
-//             return out;
-//         } else return int(num);
-//     }
-// }
+int myRound (double num) {
+    int out = 0;
+    if (num >= 0) {
+        if (num - int(num) >= 0.7) {
+            out = int(num);
+            out++;
+            return out;
+        } else return int(num);
+    } else if (num < 0) {
+        double tmp = -num;
+        if (tmp - int(tmp) >= 0.7) {
+            out = int(num);
+            out--;
+            return out;
+        } else return int(num);
+    }
+}
 
 //FIXME: 
 // Need to be edited, currently the motion is not accurate enough 
@@ -99,43 +102,63 @@ class BotController
             return true;
         } else return false;
     }
-
     void moveStr(int direction) {
         switch (direction) {
-            case STOP:
-                linear_cmd = 0;
-                break;
-            case UP:
-                // if current pos Y - start pos Y < MOVE_DIST : move
-                if (posY - initY < MOVE_DIST) {
-                    linear_cmd = LIN_VEL;
-                    std::cout << "Straight UP" << std::endl;
-                } 
-                break;
-            case DOWN:
-                // if start pos Y - current pos Y < MOVE_DIST : move
-                if (initY - posY < MOVE_DIST) {
-                    linear_cmd = LIN_VEL;
-                    std::cout << "Straight DOWN" << std::endl;
-                } 
-                break;
-            case LEFT:
-                // if start pos X - current pos X < MOVE_DIST : move
-                if (initX - posX < MOVE_DIST) {
-                    linear_cmd = LIN_VEL;
-                    std::cout << "Straight LEFT" << std::endl;
-                } 
-                break;
-            case RIGHT:
-                // if current pos X - start pos X < MOVE_DIST : move
-                if (posX - initX < MOVE_DIST) {
-                    linear_cmd = LIN_VEL;
-                    std::cout << "Straight RIGHT" << std::endl;
-                } 
-                break;
-            default:
-                break;
+        case STOP:
+            linear_cmd = 0;
+            break;
+        case UP:
+            if (posY - initY < MOVE_DIST) {
+                linear_cmd = LIN_VEL;
+                std::cout << "Straight UP" << std::endl;
+            }
+            if (yaw <= 0) {
+                yaw_cmd = YAW_VEL_CORRECTION;
+            }
+            else if (yaw > 0) {
+                yaw_cmd = -YAW_VEL_CORRECTION;
+            }
+            break;
+        case DOWN:
+            if (initY - posY < MOVE_DIST) {
+                linear_cmd = LIN_VEL;
+                std::cout << "Straight DOWN" << std::endl;
+            }
+            if (yaw > 0 && yaw <= PI) {
+                yaw_cmd = YAW_VEL_CORRECTION;
+            }
+            else if (yaw < 0 && yaw > -PI) {
+                yaw_cmd = -YAW_VEL_CORRECTION;
+            }
+            break;
+        case LEFT:
+            if (initX - posX < MOVE_DIST) {
+                linear_cmd = LIN_VEL;
+                std::cout << "Straight LEFT" << std::endl;
+            }
+            if (yaw <= PI / 2) {
+                yaw_cmd = YAW_VEL_CORRECTION;
+            }
+            else if (yaw > PI / 2) {
+                yaw_cmd = -YAW_VEL_CORRECTION;
+            }
+            break;
+        case RIGHT:
+            if (posX - initX < MOVE_DIST) {
+                linear_cmd = LIN_VEL;
+                std::cout << "Straight RIGHT" << std::endl;
+            }
+            if (yaw <= -PI / 2) {
+                yaw_cmd = YAW_VEL_CORRECTION;
+            }
+            else if (yaw > -PI / 2) {
+                yaw_cmd = -YAW_VEL_CORRECTION;
+            }
+            break;
+        default:
+            break;
         }
+        cmd.angular.z = yaw_cmd;
         cmd.linear.x = linear_cmd;
         cmd_pub.publish(cmd); //publish to robot
     }
@@ -222,12 +245,6 @@ class BotController
         cmd_pub.publish(cmd); //publish to robot
     }
 
-    // bool checkMoving() {
-    //     //return true if moving
-    //     if ((yaw_cmd == STOP) && (linear_cmd == STOP)) return false;
-    //     else return true;
-    // }
-
     coord getCoord(double posX, double posY) {
         coord curCoord (myRound(posX), myRound(posY)); //might need to change the rounding to a higher threshold. - might stop too soon
         // coord curCoord (posX, posY);
@@ -251,8 +268,8 @@ class BotController
     }
 
     bool checkBotReached(double x, double y, coord destCoord) {
-        if ((x <= destCoord.first + 0.1) && (x >= destCoord.first - 0.1)) { // if cur x position within +- 0.1 of destination x coord
-            if ((y <= destCoord.second + 0.1) && (y >= destCoord.second - 0.1)) { // if cur x position within +- 0.1 of destination y coord
+        if ((x <= destCoord.first + POSE_TOLERANCE) && (x >= destCoord.first - POSE_TOLERANCE)) { // if cur x position within +- 0.1 of destination x coord
+            if ((y <= destCoord.second + POSE_TOLERANCE) && (y >= destCoord.second - POSE_TOLERANCE)) { // if cur x position within +- 0.1 of destination y coord
                 return true;
             }
         }

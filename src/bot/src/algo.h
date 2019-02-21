@@ -20,6 +20,10 @@ typedef std::pair<int,int> coord;
 #define LEFT 3
 #define RIGHT 4
 
+
+// TODO: Can try to use a 90 x 90 grid instead and move at 0.1m each time. 
+// Then allow for diagonal movement? How to make smoothing of turns?
+
 #define GRID_ROW_X_MAX 9
 #define GRID_COL_Y_MAX 9
 
