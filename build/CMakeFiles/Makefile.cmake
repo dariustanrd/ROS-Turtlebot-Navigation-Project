@@ -232,6 +232,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "bot/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/DependInfo.cmake"
   "bot/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/DependInfo.cmake"
   "bot/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/DependInfo.cmake"
+  "bot/CMakeFiles/scan_info.dir/DependInfo.cmake"
   "bot/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/DependInfo.cmake"
   "bot/CMakeFiles/std_msgs_generate_messages_cpp.dir/DependInfo.cmake"
   "bot/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/DependInfo.cmake"

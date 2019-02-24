@@ -84,21 +84,17 @@ void DistanceLogger::callback_distance_logger(const sensor_msgs::LaserScan::Cons
 	}
 
 	if (isnanf(scan_right)){
-		//std::cout << "nan value detected right" << std::endl;
-		if(!initialized){
-			utput. Clever!
-
-With a heuristic, we need to make sure that we can actually calculate it. It’s also very important that the heuristic is always an underestimation of the total path, as an overestimation will lead to A* searching for through nodes that may not be the ‘best’ in terms of f value.
-
-scan_right = max_dist;
-		}
-		else if(scan_right_prev > 2){
-			scan_right = max_dist;
-		}
-		else if(scan_left_prev <= 2){
-			scan_right = min_dist;
-		}
-	}
+        // std::cout << "nan value detected right" << std::endl;
+        if(!initialized){
+            scan_right = max_dist;
+        }
+        else if(scan_right_prev > 2){
+            scan_right = max_dist;
+        }
+        else if(scan_left_prev <= 2){
+            scan_right = min_dist;
+        }
+    }
 
 	if(!initialized){
 		initialized = true;

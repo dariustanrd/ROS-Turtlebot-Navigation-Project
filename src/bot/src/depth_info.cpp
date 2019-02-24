@@ -136,7 +136,7 @@ class ImageConverter
             return;
         }
         // To get the depth at the optical centre (320,240)px
-        std_msgs::Float64 msg;
+        std_msgs::Float64 msg; //std_msgs::Float64MultiArray depth; //can use multiarray to send instead
         msg.data = cv_ptr->image.at<float>(320, 240);
         
         // Publisher format -->

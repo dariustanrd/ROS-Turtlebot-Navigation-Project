@@ -391,6 +391,21 @@ geometry_msgs_generate_messages_cpp/fast:
 .PHONY : geometry_msgs_generate_messages_cpp/fast
 
 # Convenience name for target.
+bot/CMakeFiles/scan_info.dir/rule:
+	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f CMakeFiles/Makefile2 bot/CMakeFiles/scan_info.dir/rule
+.PHONY : bot/CMakeFiles/scan_info.dir/rule
+
+# Convenience name for target.
+scan_info: bot/CMakeFiles/scan_info.dir/rule
+
+.PHONY : scan_info
+
+# fast build rule for target.
+scan_info/fast:
+	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/build
+.PHONY : scan_info/fast
+
+# Convenience name for target.
 bot/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule:
 	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f CMakeFiles/Makefile2 bot/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule
 .PHONY : bot/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/rule
@@ -816,6 +831,33 @@ src/pos_info.cpp.s:
 	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f bot/CMakeFiles/pos_info.dir/build.make bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.s
 .PHONY : src/pos_info.cpp.s
 
+src/scan_info.o: src/scan_info.cpp.o
+
+.PHONY : src/scan_info.o
+
+# target to build an object file
+src/scan_info.cpp.o:
+	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/src/scan_info.cpp.o
+.PHONY : src/scan_info.cpp.o
+
+src/scan_info.i: src/scan_info.cpp.i
+
+.PHONY : src/scan_info.i
+
+# target to preprocess a source file
+src/scan_info.cpp.i:
+	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/src/scan_info.cpp.i
+.PHONY : src/scan_info.cpp.i
+
+src/scan_info.s: src/scan_info.cpp.s
+
+.PHONY : src/scan_info.s
+
+# target to generate assembly for a file
+src/scan_info.cpp.s:
+	cd /home/darius/ROS_Workspaces/proj1_ws/build && $(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/src/scan_info.cpp.s
+.PHONY : src/scan_info.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -842,6 +884,7 @@ help:
 	@echo "... actionlib_msgs_generate_messages_nodejs"
 	@echo "... sensor_msgs_generate_messages_nodejs"
 	@echo "... geometry_msgs_generate_messages_cpp"
+	@echo "... scan_info"
 	@echo "... rosgraph_msgs_generate_messages_cpp"
 	@echo "... std_msgs_generate_messages_cpp"
 	@echo "... actionlib_msgs_generate_messages_eus"
@@ -876,6 +919,9 @@ help:
 	@echo "... src/pos_info.o"
 	@echo "... src/pos_info.i"
 	@echo "... src/pos_info.s"
+	@echo "... src/scan_info.o"
+	@echo "... src/scan_info.i"
+	@echo "... src/scan_info.s"
 .PHONY : help
 
 

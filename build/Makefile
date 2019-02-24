@@ -478,6 +478,19 @@ geometry_msgs_generate_messages_cpp/fast:
 .PHONY : geometry_msgs_generate_messages_cpp/fast
 
 #=============================================================================
+# Target rules for targets named scan_info
+
+# Build rule for target.
+scan_info: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 scan_info
+.PHONY : scan_info
+
+# fast build rule for target.
+scan_info/fast:
+	$(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/build
+.PHONY : scan_info/fast
+
+#=============================================================================
 # Target rules for targets named rosgraph_msgs_generate_messages_cpp
 
 # Build rule for target.
@@ -813,6 +826,7 @@ help:
 	@echo "... actionlib_msgs_generate_messages_nodejs"
 	@echo "... sensor_msgs_generate_messages_nodejs"
 	@echo "... geometry_msgs_generate_messages_cpp"
+	@echo "... scan_info"
 	@echo "... rosgraph_msgs_generate_messages_cpp"
 	@echo "... std_msgs_generate_messages_cpp"
 	@echo "... actionlib_msgs_generate_messages_eus"

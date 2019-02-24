@@ -48,6 +48,7 @@
 /home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir
 /home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir
 /home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/geometry_msgs_generate_messages_cpp.dir
+/home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/scan_info.dir
 /home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir
 /home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/std_msgs_generate_messages_cpp.dir
 /home/darius/ROS_Workspaces/proj1_ws/build/bot/CMakeFiles/actionlib_msgs_generate_messages_eus.dir

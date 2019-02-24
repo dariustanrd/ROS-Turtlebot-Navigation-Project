@@ -146,6 +146,7 @@ include_directories(
 add_executable(depth_info src/depth_info.cpp)
 add_executable(pos_info src/pos_info.cpp)
 add_executable(bot_control src/bot_control.cpp)
+add_executable(scan_info src/scan_info.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -173,7 +174,10 @@ target_link_libraries(bot_control
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
 )
-
+target_link_libraries(scan_info 
+   ${catkin_LIBRARIES} 
+   ${OpenCV_LIBRARIES}
+)
 
 #############
 ## Install ##

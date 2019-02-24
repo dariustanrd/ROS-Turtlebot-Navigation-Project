@@ -392,6 +392,7 @@ clean: gtest/gtest/CMakeFiles/gtest_main.dir/clean
 # Convenience name for "all" pass in the directory.
 bot/all: bot/CMakeFiles/bot_control.dir/all
 bot/all: bot/CMakeFiles/depth_info.dir/all
+bot/all: bot/CMakeFiles/scan_info.dir/all
 bot/all: bot/CMakeFiles/pos_info.dir/all
 
 .PHONY : bot/all
@@ -412,6 +413,7 @@ bot/clean: bot/CMakeFiles/geometry_msgs_generate_messages_py.dir/clean
 bot/clean: bot/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/clean
 bot/clean: bot/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/clean
 bot/clean: bot/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/clean
+bot/clean: bot/CMakeFiles/scan_info.dir/clean
 bot/clean: bot/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/clean
 bot/clean: bot/CMakeFiles/std_msgs_generate_messages_cpp.dir/clean
 bot/clean: bot/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/clean
@@ -930,6 +932,43 @@ bot/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/clean:
 
 # clean rule for target.
 clean: bot/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target bot/CMakeFiles/scan_info.dir
+
+# All Build rule for target.
+bot/CMakeFiles/scan_info.dir/all:
+	$(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/depend
+	$(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/darius/ROS_Workspaces/proj1_ws/build/CMakeFiles --progress-num=18,19 "Built target scan_info"
+.PHONY : bot/CMakeFiles/scan_info.dir/all
+
+# Include target in all.
+all: bot/CMakeFiles/scan_info.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+bot/CMakeFiles/scan_info.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/darius/ROS_Workspaces/proj1_ws/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 bot/CMakeFiles/scan_info.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/darius/ROS_Workspaces/proj1_ws/build/CMakeFiles 0
+.PHONY : bot/CMakeFiles/scan_info.dir/rule
+
+# Convenience name for target.
+scan_info: bot/CMakeFiles/scan_info.dir/rule
+
+.PHONY : scan_info
+
+# clean rule for target.
+bot/CMakeFiles/scan_info.dir/clean:
+	$(MAKE) -f bot/CMakeFiles/scan_info.dir/build.make bot/CMakeFiles/scan_info.dir/clean
+.PHONY : bot/CMakeFiles/scan_info.dir/clean
+
+# clean rule for target.
+clean: bot/CMakeFiles/scan_info.dir/clean
 
 .PHONY : clean
 
