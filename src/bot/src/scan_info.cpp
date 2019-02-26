@@ -13,6 +13,7 @@ class depthScanner {
     
 		std_msgs::Float64MultiArray scan_msg;
 		float scan_left, scan_mid, scan_right, leftPrev, midPrev, rightPrev;
+		float send_left, send_mid, send_right;
 
 	public:
     depthScanner(ros::NodeHandle &nh){
@@ -26,22 +27,34 @@ class depthScanner {
 			scan_mid = scan_vect[midIdx];
 			scan_left = scan_vect.back();
 
-			// std::cout << "Before isNaN --> Scan Left: " << scan_left << " Scan Mid: " << scan_mid << " Scan Right: " << scan_right << std::endl;
-			
-			// leftPrev = scan_left;
-			// midPrev = scan_mid;
-			// rightPrev = scan_right;
+
+			// TODO: if scan value more than 3, set as max. if scan value less than 0.5 set as min
+			// publish the fixed value
+
+			std::cout << "Scan Left: " << scan_left << " Scan Mid: " << scan_mid << " Scan Right: " << scan_right << std::endl;
+
+			if(scan_left > 4.5) send_left = MAX_DEPTH;
+			else if (scan_left < 0.45) send_left = MIN_DEPTH;
+			else send_left = scan_left;
+
+			if(scan_left > 4.5) send_left = MAX_DEPTH;
+			else if (scan_left < 0.45) send_left = MIN_DEPTH;
+			else send_left = scan_left;
+
+			if(scan_left > 4.5) send_left = MAX_DEPTH;
+			else if (scan_left < 0.45) send_left = MIN_DEPTH;
+			else send_left = scan_left;
 
 			// if(std::isnan(scan_left)) {
-			// 	if (leftPrev > 1.0) scan_left = MAX_DEPTH; // prev value large, means going to max
+			// 	if (leftPrev >= 2.0) scan_left = MAX_DEPTH; // prev value large, means going to max
 			// 	else scan_left = MIN_DEPTH; // prev value small, means going to min
 			// }
 			// if(std::isnan(scan_mid)) {
-			// 	if (midPrev > 1.0) scan_mid = MAX_DEPTH; // prev value large, means going to max
+			// 	if (midPrev >= 2.0) scan_mid = MAX_DEPTH; // prev value large, means going to max
 			// 	else scan_mid = MIN_DEPTH; // prev value small, means going to min
 			// }
 			// if(std::isnan(scan_right)) {
-			// 	if (rightPrev > 1.0) scan_right = MAX_DEPTH; // prev value large, means going to max
+			// 	if (rightPrev >= 2.0) scan_right = MAX_DEPTH; // prev value large, means going to max
 			// 	else scan_right = MIN_DEPTH; // prev value small, means going to min
 			// }
 			
@@ -50,12 +63,15 @@ class depthScanner {
 			// 		dim: []
 			// 		data_offset: 0
 			// data: [1.2506714127957979, 0.006914342738347928, -0.03538435380413812]
-			std::cout << "Scan Left: " << scan_left << " Scan Mid: " << scan_mid << " Scan Right: " << scan_right << std::endl;
+			std::cout << "Send Left: " << send_left << " send Mid: " << send_mid << " send Right: " << send_right << std::endl;
 
 			scan_msg.data.resize(3); //resize array to 3
-    	scan_msg.data[0] = scan_left;
-    	scan_msg.data[1] = scan_mid;
-    	scan_msg.data[2] = scan_right;
+    	// scan_msg.data[0] = scan_left;
+    	// scan_msg.data[1] = scan_mid;
+    	// scan_msg.data[2] = scan_right;
+			scan_msg.data[0] = send_left;
+    	scan_msg.data[1] = send_mid;
+    	scan_msg.data[2] = send_right;
 			scan_info.publish(scan_msg);
 			std::cout << std::endl;
 		}

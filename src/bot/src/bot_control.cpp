@@ -31,7 +31,7 @@ static const double POSE_TOLERANCE = 0.1;
 static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
 static const double YAW_VEL = 0.4;
-static const double YAW_VEL_CORRECTION = 0.1;
+static const double YAW_VEL_CORRECTION = 0.2;
 
 int myRound (double num) {
     int out = 0;
@@ -113,10 +113,10 @@ class BotController
                 std::cout << "Straight UP" << std::endl;
             }
             if (yaw <= 0) {
-                yaw_cmd = YAW_VEL_CORRECTION;
+                yaw_cmd = YAW_VEL_CORRECTION; //ACW
             }
             else if (yaw > 0) {
-                yaw_cmd = -YAW_VEL_CORRECTION;
+                yaw_cmd = -YAW_VEL_CORRECTION; //CW
             }
             break;
         case DOWN:
@@ -124,10 +124,12 @@ class BotController
                 linear_cmd = LIN_VEL;
                 std::cout << "Straight DOWN" << std::endl;
             }
-            if (yaw > 0 && yaw <= PI) {
+            // if (yaw > 0 && yaw <= PI) {
+            if (yaw > 0) {
                 yaw_cmd = YAW_VEL_CORRECTION;
             }
-            else if (yaw < 0 && yaw > -PI) {
+            // else if (yaw < 0 && yaw > -PI) {
+            else if (yaw < 0) {
                 yaw_cmd = -YAW_VEL_CORRECTION;
             }
             break;
