@@ -1,6 +1,6 @@
 //************************************************************************************************************************************//
 // Main controller file. To include search algorithms for pathfinding.
-// Edited by: Darius Tan
+// Edited by: Darius Tan & Franky
 //************************************************************************************************************************************//
 
 #include <ros/ros.h>
@@ -63,7 +63,8 @@ class BotController
     ros::Publisher cmd_pub;
     double posX, posY;
     double yaw;
-    double depth;
+    double depth, depthR, depthL;
+    double laserL, laserM, laserR;
     
     geometry_msgs::Twist cmd;
     double linear_cmd, yaw_cmd;
@@ -84,10 +85,28 @@ class BotController
         // nextCoord = startCoord;
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
+        laser_sub = nh.subscribe("/distance_logger/distances", 1, &BotController::laserCallback, this);
         pose_sub = nh.subscribe("pos_info", 1, &BotController::poseCallback, this);
         cmd_pub = nh.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity",1);
         begin = ros::Time::now();
     }
+
+    void laserCallback(const std_msgs::Float32MultiArray::ConstPtr& laser_data) {
+        laserL = laser_data -> data[0];
+        laserM = laser_data -> data[1];
+        laserR = laser_data -> data[2];
+        if (std::isnan(laserL)) {
+            laserL = MIN_DEPTH;
+        }
+        if (std::isnan(laserM)) {
+            laserM = MIN_DEPTH;
+        }
+        if (std::isnan(laserR)) {
+            laserR = MIN_DEPTH;
+        }
+        std::cout << "laserL: " << laserL << "__laserM: " << laserM << "__laserR: " << laserR << std::endl;
+    }
+
     void depthCallback(const std_msgs::Float64::ConstPtr& depth_data) {
         depth = depth_data -> data;
         if (std::isnan(depth)) {
@@ -102,6 +121,7 @@ class BotController
             return true;
         } else return false;
     }
+
     void moveStr(int direction) {
         switch (direction) {
         case STOP:
@@ -112,50 +132,90 @@ class BotController
                 linear_cmd = LIN_VEL;
                 std::cout << "Straight UP" << std::endl;
             }
-            if (yaw <= 0) {
-                yaw_cmd = YAW_VEL_CORRECTION; //ACW
+            if (posX >= curCoord.first){
+                if (yaw <= 0){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
-            else if (yaw > 0) {
-                yaw_cmd = -YAW_VEL_CORRECTION; //CW
+            else if (posX <= curCoord.first){
+                if (yaw >= 0){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
+            // if (yaw <= 0) {
+            //     yaw_cmd = YAW_VEL_CORRECTION; //ACW
+            // }
+            // else if (yaw > 0) {
+            //     yaw_cmd = -YAW_VEL_CORRECTION; //CW
+            // }
             break;
         case DOWN:
             if (initY - posY < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
                 std::cout << "Straight DOWN" << std::endl;
             }
-            // if (yaw > 0 && yaw <= PI) {
-            if (yaw > 0) {
-                yaw_cmd = YAW_VEL_CORRECTION;
+            if (posX >= curCoord.first){
+                if (yaw <0 && yaw > -PI){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
-            // else if (yaw < 0 && yaw > -PI) {
-            else if (yaw < 0) {
-                yaw_cmd = -YAW_VEL_CORRECTION;
+            else if (posX <= curCoord.first){
+                if (yaw > 0 && yaw <= PI){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
+            // // if (yaw > 0 && yaw <= PI) {
+            // if (yaw > 0) {
+            //     yaw_cmd = YAW_VEL_CORRECTION;
+            // }
+            // // else if (yaw < 0 && yaw > -PI) {
+            // else if (yaw < 0) {
+            //     yaw_cmd = -YAW_VEL_CORRECTION;
+            // }
             break;
         case LEFT:
             if (initX - posX < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
                 std::cout << "Straight LEFT" << std::endl;
             }
-            if (yaw <= PI / 2) {
-                yaw_cmd = YAW_VEL_CORRECTION;
+            if (posY >= curCoord.second) {
+                if (yaw <= PI/2){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
-            else if (yaw > PI / 2) {
-                yaw_cmd = -YAW_VEL_CORRECTION;
+            else if (posY < curCoord.second) {
+                if (yaw >= PI/2){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
+            // if (yaw <= PI / 2) {
+            //     yaw_cmd = YAW_VEL_CORRECTION;
+            // }
+            // else if (yaw > PI / 2) {
+            //     yaw_cmd = -YAW_VEL_CORRECTION;
+            // }
             break;
         case RIGHT:
             if (posX - initX < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
                 std::cout << "Straight RIGHT" << std::endl;
             }
-            if (yaw <= -PI / 2) {
-                yaw_cmd = YAW_VEL_CORRECTION;
+            if (posY >= curCoord.second) {
+                if (yaw >= -PI/2){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
-            else if (yaw > -PI / 2) {
-                yaw_cmd = -YAW_VEL_CORRECTION;
+            else if (posY < curCoord.second) {
+                if (yaw <= -PI/2){
+                    yaw_cmd = YAW_VEL_CORRECTION;
+                }
             }
+            // if (yaw <= -PI / 2) {
+            //     yaw_cmd = YAW_VEL_CORRECTION;
+            // }
+            // else if (yaw > -PI / 2) {
+            //     yaw_cmd = -YAW_VEL_CORRECTION;
+            // }
             break;
         default:
             break;
@@ -270,8 +330,8 @@ class BotController
     }
 
     bool checkBotReached(double x, double y, coord destCoord) {
-        if ((x <= destCoord.first + POSE_TOLERANCE) && (x >= destCoord.first - POSE_TOLERANCE)) { // if cur x position within +- 0.1 of destination x coord
-            if ((y <= destCoord.second + POSE_TOLERANCE) && (y >= destCoord.second - POSE_TOLERANCE)) { // if cur x position within +- 0.1 of destination y coord
+        if ((x <= destCoord.first + POSE_TOLERANCE) && (x >= destCoord.first - POSE_TOLERANCE)) { // if cur x position within +- tolerance of destination x coord
+            if ((y <= destCoord.second + POSE_TOLERANCE) && (y >= destCoord.second - POSE_TOLERANCE)) { // if cur x position within +- tolerance of destination y coord
                 return true;
             }
         }
