@@ -7,6 +7,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <geometry_msgs/Twist.h>
 
 #include "algo.h"
@@ -31,7 +32,7 @@ static const double POSE_TOLERANCE = 0.1;
 static const double MOVE_DIST = 1.0;
 static const double LIN_VEL = 0.5;
 static const double YAW_VEL = 0.4;
-static const double YAW_VEL_CORRECTION = 0.2;
+static const double YAW_VEL_CORRECTION = 0.1;
 
 int myRound (double num) {
     int out = 0;
@@ -59,6 +60,7 @@ class BotController
 {
   private:
     ros::Subscriber depth_sub;
+    ros::Subscriber laser_sub;
     ros::Subscriber pose_sub;
     ros::Publisher cmd_pub;
     double posX, posY;
@@ -85,13 +87,15 @@ class BotController
         // nextCoord = startCoord;
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
-        laser_sub = nh.subscribe("/distance_logger/distances", 1, &BotController::laserCallback, this);
+        laser_sub = nh.subscribe("/distance_logger/distances", 1, &BotController::laserCallback, this); //FIXME:need distance_logger node
+        // laser_sub = nh.subscribe("scan_info", 1, &BotController::laserCallback, this); //FIXME:need distance_logger node
         pose_sub = nh.subscribe("pos_info", 1, &BotController::poseCallback, this);
         cmd_pub = nh.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity",1);
         begin = ros::Time::now();
     }
 
     void laserCallback(const std_msgs::Float32MultiArray::ConstPtr& laser_data) {
+    // void laserCallback(const std_msgs::Float64MultiArray::ConstPtr& laser_data) {
         laserL = laser_data -> data[0];
         laserM = laser_data -> data[1];
         laserR = laser_data -> data[2];
@@ -139,7 +143,7 @@ class BotController
             }
             else if (posX <= curCoord.first){
                 if (yaw >= 0){
-                    yaw_cmd = YAW_VEL_CORRECTION;
+                    yaw_cmd = -YAW_VEL_CORRECTION;
                 }
             }
             // if (yaw <= 0) {
@@ -156,7 +160,7 @@ class BotController
             }
             if (posX >= curCoord.first){
                 if (yaw <0 && yaw > -PI){
-                    yaw_cmd = YAW_VEL_CORRECTION;
+                    yaw_cmd = -YAW_VEL_CORRECTION;
                 }
             }
             else if (posX <= curCoord.first){
@@ -185,7 +189,7 @@ class BotController
             }
             else if (posY < curCoord.second) {
                 if (yaw >= PI/2){
-                    yaw_cmd = YAW_VEL_CORRECTION;
+                    yaw_cmd = -YAW_VEL_CORRECTION;
                 }
             }
             // if (yaw <= PI / 2) {
@@ -202,7 +206,7 @@ class BotController
             }
             if (posY >= curCoord.second) {
                 if (yaw >= -PI/2){
-                    yaw_cmd = YAW_VEL_CORRECTION;
+                    yaw_cmd = -YAW_VEL_CORRECTION;
                 }
             }
             else if (posY < curCoord.second) {
