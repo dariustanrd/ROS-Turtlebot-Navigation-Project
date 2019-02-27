@@ -87,15 +87,13 @@ class BotController
         // nextCoord = startCoord;
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
-        laser_sub = nh.subscribe("/distance_logger/distances", 1, &BotController::laserCallback, this); //FIXME:need distance_logger node
-        // laser_sub = nh.subscribe("scan_info", 1, &BotController::laserCallback, this); //FIXME:need distance_logger node
+        laser_sub = nh.subscribe("scan_info", 1, &BotController::laserCallback, this);
         pose_sub = nh.subscribe("pos_info", 1, &BotController::poseCallback, this);
         cmd_pub = nh.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity",1);
         begin = ros::Time::now();
     }
 
-    void laserCallback(const std_msgs::Float32MultiArray::ConstPtr& laser_data) {
-    // void laserCallback(const std_msgs::Float64MultiArray::ConstPtr& laser_data) {
+    void laserCallback(const std_msgs::Float64MultiArray::ConstPtr& laser_data) {
         laserL = laser_data -> data[0];
         laserM = laser_data -> data[1];
         laserR = laser_data -> data[2];

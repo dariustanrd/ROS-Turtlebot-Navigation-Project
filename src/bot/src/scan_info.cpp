@@ -12,39 +12,62 @@ class depthScanner {
 		std::vector<float> scan_vect;
     
 		std_msgs::Float64MultiArray scan_msg;
-		float scan_left, scan_mid, scan_right, leftPrev, midPrev, rightPrev;
+		float scan_left, scan_mid, scan_right;
+		float leftPrev, midPrev, rightPrev;
 		float send_left, send_mid, send_right;
+
+		bool startup;
 
 	public:
     depthScanner(ros::NodeHandle &nh){
-			scan_sub = nh.subscribe("/scan", 1, &depthScanner::callback, this);
+			scan_sub = nh.subscribe("/scan", 1, &depthScanner::scanCallback, this);
 			scan_info = nh.advertise< std_msgs::Float64MultiArray >("scan_info", 1);
+			startup = true;
 		}
-    void callback(const sensor_msgs::LaserScan::ConstPtr& scan) {
+		void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 			scan_vect = scan->ranges;
 			int midIdx = (int)round(scan_vect.size() / 2.0);
 			scan_right = scan_vect.front();
 			scan_mid = scan_vect[midIdx];
 			scan_left = scan_vect.back();
 
-
-			// TODO: if scan value more than 3, set as max. if scan value less than 0.5 set as min
-			// publish the fixed value
-
 			std::cout << "Scan Left: " << scan_left << " Scan Mid: " << scan_mid << " Scan Right: " << scan_right << std::endl;
 
-			if(scan_left > 4.5) send_left = MAX_DEPTH;
-			else if (scan_left < 0.45) send_left = MIN_DEPTH;
-			else send_left = scan_left;
-
-			if(scan_left > 4.5) send_left = MAX_DEPTH;
-			else if (scan_left < 0.45) send_left = MIN_DEPTH;
-			else send_left = scan_left;
-
-			if(scan_left > 4.5) send_left = MAX_DEPTH;
-			else if (scan_left < 0.45) send_left = MIN_DEPTH;
-			else send_left = scan_left;
-
+			if (startup) {
+				if (std::isnan(scan_left))
+					send_left = MAX_DEPTH;
+				if (std::isnan(scan_mid))
+					send_mid = MAX_DEPTH;
+				if (std::isnan(scan_right))
+					send_right = MAX_DEPTH;
+				startup = false;
+			}
+			else {
+				if (std::isnan(scan_left)) {
+					if (send_left >= 2.0)
+						send_left = MAX_DEPTH;
+					else
+						send_left = MIN_DEPTH;
+				} 
+				else
+					send_left = scan_left;
+				if (std::isnan(scan_mid)) {
+					if (send_mid >= 2.0)
+						send_mid = MAX_DEPTH;
+					else
+						send_mid = MIN_DEPTH;
+				} 
+				else
+					send_mid = scan_mid;
+				if (std::isnan(scan_right)) {
+					if (send_right >= 2.0)
+						send_right = MAX_DEPTH;
+					else
+						send_right = MIN_DEPTH;
+				} 
+				else
+					send_right = scan_right;
+			}
 			// if(std::isnan(scan_left)) {
 			// 	if (leftPrev >= 2.0) scan_left = MAX_DEPTH; // prev value large, means going to max
 			// 	else scan_left = MIN_DEPTH; // prev value small, means going to min
