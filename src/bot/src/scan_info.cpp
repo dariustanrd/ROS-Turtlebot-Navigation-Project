@@ -1,3 +1,9 @@
+//************************************************************************************************************************************//
+// Node to return depth information from Laserscan for Left, Middle, Right
+// From online sources
+// Edited by: Darius Tan
+//************************************************************************************************************************************//
+
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <std_msgs/Float64MultiArray.h>
@@ -13,7 +19,6 @@ class depthScanner {
     
 		std_msgs::Float64MultiArray scan_msg;
 		float scan_left, scan_mid, scan_right;
-		float leftPrev, midPrev, rightPrev;
 		float send_left, send_mid, send_right;
 
 		bool startup;
@@ -30,8 +35,6 @@ class depthScanner {
 			scan_right = scan_vect.front();
 			scan_mid = scan_vect[midIdx];
 			scan_left = scan_vect.back();
-
-			std::cout << "Scan Left: " << scan_left << " Scan Mid: " << scan_mid << " Scan Right: " << scan_right << std::endl;
 
 			if (startup) {
 				if (std::isnan(scan_left))
@@ -67,36 +70,15 @@ class depthScanner {
 				} 
 				else
 					send_right = scan_right;
-			}
-			// if(std::isnan(scan_left)) {
-			// 	if (leftPrev >= 2.0) scan_left = MAX_DEPTH; // prev value large, means going to max
-			// 	else scan_left = MIN_DEPTH; // prev value small, means going to min
-			// }
-			// if(std::isnan(scan_mid)) {
-			// 	if (midPrev >= 2.0) scan_mid = MAX_DEPTH; // prev value large, means going to max
-			// 	else scan_mid = MIN_DEPTH; // prev value small, means going to min
-			// }
-			// if(std::isnan(scan_right)) {
-			// 	if (rightPrev >= 2.0) scan_right = MAX_DEPTH; // prev value large, means going to max
-			// 	else scan_right = MIN_DEPTH; // prev value small, means going to min
-			// }
+			}			
 			
-			// Publisher format -->
-			// layout:
-			// 		dim: []
-			// 		data_offset: 0
-			// data: [1.2506714127957979, 0.006914342738347928, -0.03538435380413812]
 			std::cout << "Send Left: " << send_left << " send Mid: " << send_mid << " send Right: " << send_right << std::endl;
 
-			scan_msg.data.resize(3); //resize array to 3
-    	// scan_msg.data[0] = scan_left;
-    	// scan_msg.data[1] = scan_mid;
-    	// scan_msg.data[2] = scan_right;
+			scan_msg.data.resize(3);
 			scan_msg.data[0] = send_left;
     	scan_msg.data[1] = send_mid;
     	scan_msg.data[2] = send_right;
 			scan_info.publish(scan_msg);
-			std::cout << std::endl;
 		}
 };
 

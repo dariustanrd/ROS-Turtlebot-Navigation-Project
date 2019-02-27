@@ -1,5 +1,6 @@
 //************************************************************************************************************************************//
-// From Navigator & Turner cpp files.
+// Node to return position estimates based on odometery values.
+// From given Navigator & Turner C++ files.
 // Edited by: Darius Tan
 //************************************************************************************************************************************//
 
@@ -9,8 +10,6 @@
 #include <std_msgs/Float64MultiArray.h>
 
 //********************** Info Reader CLASS **********************//
-// WRT starting position X = 0, Y = 0, yaw = 0
-// Goal position = x: 4 y: 4
 // Positive pose on map:	Yaw orientation on map:
 //  Y						//          0
 //  |						//      +       -
@@ -31,8 +30,6 @@ public:
 	}
 
 	void callback( const nav_msgs::OdometryConstPtr& poseMsg){
-        // Take current X, Y positions, Z orientation
-
 		// Changed positive pose on map:
 		//  Y
 		//  |
@@ -41,8 +38,6 @@ public:
 		//   -------> X
 		double posX = -poseMsg->pose.pose.position.y;
 		double posY = poseMsg->pose.pose.position.x;
-		// double posX = poseMsg->pose.pose.position.x;
-		// double posY = poseMsg->pose.pose.position.y;
 
 		// Quartenion processing
         // Use the turner.cpp quartenion processing methods than navigator.cpp (*2.19 hardcode)
@@ -57,8 +52,8 @@ public:
         // Don't need roll and pitch, just take yaw.
     	m.getRPY(roll, pitch, yaw);
 
-        // maybe change output instead of using Float64MultiArray
-    	position.data.resize(3); //resize array to 3
+    	position.data.resize(3);
+
     	position.data[0] = posX;
     	position.data[1] = posY;
     	position.data[2] = yaw;
