@@ -174,22 +174,35 @@ class pathfinderAlgo{
 
         switch (wallDirection){
 		case UP:
+            if (curCoord.second == GRID_COL_Y_MAX-1) { // at boundary
+                break;
+            }
             grid[row][col].wallUp = true;
             grid[row][col+1].wallDown = true;
 		break;
 		case DOWN:
+            if (curCoord.second == 0) { // at boundary
+                break;
+            }
             grid[row][col].wallDown = true;
             grid[row][col-1].wallUp = true;
 		break;
         case LEFT:
+            if (curCoord.first == 0) { // at boundary
+                break;
+            }
             grid[row][col].wallLeft = true;
             grid[row-1][col].wallRight = true;
 		break;
 		case RIGHT:
+            if (curCoord.first == GRID_ROW_X_MAX-1) { // at boundary
+                break;
+            }
             grid[row][col].wallRight = true;
             grid[row+1][col].wallLeft = true;
 		break;
 	    }
+        std::cout << "Updated walls" << std::endl;
     }
     coord retrace(coord point) {
         coord next, parent;

@@ -22,6 +22,7 @@
 //  ------> X				//      3.14 -3.14
 
 static const double MIN_DEPTH = 0.40;
+static const double MAX_DEPTH = 5.0;
 static const double PI = 3.1415;
 static const double ANG_ERR = 0.1;
 // static const double DEPTH_LIM = 0.7;
@@ -52,10 +53,6 @@ int myRound (double num) {
     }
 }
 
-//FIXME: 
-// Need to be edited, currently the motion is not accurate enough 
-// which causes the bot to drift!
-
 class BotController
 {
   private:
@@ -65,9 +62,11 @@ class BotController
     ros::Publisher cmd_pub;
     double posX, posY;
     double yaw;
-    double depth, depthR, depthL;
+    double depth;
     double laserL, laserM, laserR;
-    
+
+    bool preemptedWall;
+
     geometry_msgs::Twist cmd;
     double linear_cmd, yaw_cmd;
     double initX, initY;
@@ -76,15 +75,23 @@ class BotController
     pathfinderAlgo algo;
     coord curCoord, nextCoord;
 
+    bool reachedGoalOnce;
+
   public:
     BotController(ros::NodeHandle &nh) {
         movedFlag = true;
         linear_cmd = 0;
         yaw_cmd = 0;
+        depth = MAX_DEPTH;
+        laserL = MAX_DEPTH;
+        laserM = MAX_DEPTH;
+        laserR = MAX_DEPTH;
+        preemptedWall = false;
+        reachedGoalOnce = false;
+
         curCoord = startCoord;
         algo = pathfinderAlgo();
         nextCoord = algo.aStar(startCoord);
-        // nextCoord = startCoord;
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
         laser_sub = nh.subscribe("scan_info", 1, &BotController::laserCallback, this);
@@ -97,16 +104,18 @@ class BotController
         laserL = laser_data -> data[0];
         laserM = laser_data -> data[1];
         laserR = laser_data -> data[2];
-        if (std::isnan(laserL)) {
-            laserL = MIN_DEPTH;
-        }
-        if (std::isnan(laserM)) {
-            laserM = MIN_DEPTH;
-        }
-        if (std::isnan(laserR)) {
-            laserR = MIN_DEPTH;
-        }
-        std::cout << "laserL: " << laserL << "__laserM: " << laserM << "__laserR: " << laserR << std::endl;
+
+        // Dont need this since will never be nan as per scan_info
+        // if (std::isnan(laserL)) {
+        //     laserL = MIN_DEPTH;
+        // }
+        // if (std::isnan(laserM)) {
+        //     laserM = MIN_DEPTH;
+        // }
+        // if (std::isnan(laserR)) {
+        //     laserR = MIN_DEPTH;
+        // }
+        // std::cout << "laserL: " << laserL << "laserM: " << laserM << "laserR: " << laserR << std::endl;
     }
 
     void depthCallback(const std_msgs::Float64::ConstPtr& depth_data) {
@@ -120,6 +129,7 @@ class BotController
     bool checkObs() {
         // return true if obs detected
         if (depth <= DEPTH_LIM) {
+            std::cout << "Block depth: " << depth << std::endl;
             return true;
         } else return false;
     }
@@ -340,6 +350,97 @@ class BotController
         return false;
     }
 
+    bool movedHalfway(int direction) {
+        switch (direction) {
+            case UP:
+                if (posY - curCoord.second > 0.5)
+                    return true;
+                break;
+            case DOWN:
+                if (curCoord.second - posY > 0.5)
+                    return true;
+                break;
+            case LEFT:
+                if (curCoord.first - posX > 0.5)
+                    return true;
+                break;
+            case RIGHT:
+                if (posX - curCoord.first > 0.5)
+                    return true;
+                break;
+        }
+        return false;
+    }
+
+    void preemptWall(int direction) {
+        // if moved halfway between the coordinates & preempted == false;
+            // preempted = true; // to make it run only once when halfway between coordinates.
+            // if current face UP
+                // if laser left < 1, updateWall(nextCoord, LEFT)
+                // if laser right < 1, updateWall(nextCoord, RIGHT)
+            // if current face DOWN
+                // if laser left < 1, updateWall(nextCoord, RIGHT)
+                // if laser right < 1, updateWall(nextCoord, LEFT)
+            // if current face LEFT
+                // if laser left < 1, updateWall(nextCoord, DOWN)
+                // if laser right < 1, updateWall(nextCoord, UP)
+            // if current face RIGHT
+                // if laser left < 1, updateWall(nextCoord, UP)
+                // if laser right < 1, updateWall(nextCoord, DOWN)
+        // then when it reaches the next coord and runs aStar again, it will realise there is a wall somewhere without turning towards it.
+        if (!preemptedWall && movedHalfway(direction)) {
+            std::cout << "Preempting wall along direction: " << direction << std::endl;
+            switch (direction) {
+                case UP:
+                // std::cout << "In case UP" << std::endl;
+                    if (laserL <= 1) {
+                        // std::cout << "In laserL <=1" << std::endl;
+                        algo.updateWall(nextCoord, LEFT);
+                        std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    if (laserR <= 1) {
+                        // std::cout << "In laserR <=1" << std::endl;
+                        algo.updateWall(nextCoord, RIGHT);
+                        std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    break;
+                case DOWN:
+                // std::cout << "In case DOWN" << std::endl;
+                    if (laserL <= 1) {
+                        algo.updateWall(nextCoord, RIGHT);
+                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    if (laserR <= 1) {
+                        algo.updateWall(nextCoord, LEFT);
+                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    break;
+                case LEFT:
+                // std::cout << "In case LEFT" << std::endl;
+                    if (laserL <= 1) {
+                        algo.updateWall(nextCoord, DOWN);
+                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    if (laserR <= 1) {
+                        algo.updateWall(nextCoord, UP);
+                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    break;
+                case RIGHT:
+                // std::cout << "In case RIGHT" << std::endl;
+                    if (laserL <= 1) {
+                        algo.updateWall(nextCoord, UP);
+                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    if (laserR <= 1) {
+                        algo.updateWall(nextCoord, DOWN);
+                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    }
+                    break;
+            }
+            preemptedWall = true;
+        }
+    }
     void poseCallback(const std_msgs::Float64MultiArray::ConstPtr& pose_data) {
         posX = pose_data -> data[0];
         posY = pose_data -> data[1];
@@ -354,24 +455,25 @@ class BotController
         int nextStep;
         algo.resetGrid();
 
-        // if (curCoord == goalCoord) {
         if (checkBotReached(posX,posY,goalCoord)) {
-            ros::Time goalReached = ros::Time::now();
-            ros::Duration timeGoal = goalReached - begin;
-            double timeGoalSec = timeGoal.toSec();
             moveFace(STOP);
             moveStr(STOP);
-            std::cout << "Reached Goal Coordinate" << std::endl;
-            std::cout << "Time Taken: " << timeGoalSec << std::endl;
+            if (!reachedGoalOnce) {
+                ros::Time goalReached = ros::Time::now();
+                ros::Duration timeGoal = goalReached - begin;
+                double timeGoalSec = timeGoal.toSec();
+                std::cout << "=========================== Reached Goal Coordinate ===========================" << std::endl;
+                std::cout << "Time Taken: " << timeGoalSec << std::endl;
+                reachedGoalOnce = true;
+            }
         } else {
-            // if (curCoord == nextCoord) { //have reached next step. Get next coord.
             if (checkBotReached(posX,posY,nextCoord)) { //have reached next step. Get next coord.
-                //give current coord, goal coord to pathfinder, pathfinder return next coord
                 curCoord = getCoord(posX, posY);
                 // nextCoord = pathfinder(curCoord, goalCoord); //this is for testing only
                 nextCoord = algo.aStar(curCoord); //use aStar algo to get the nextCoord
                 std::cout << "Next Coord" << std::endl;
                 movedFlag = true;
+                preemptedWall = false;
             }
             nextStep = checkCoordFace(curCoord, nextCoord);
             std::cout << "Next Coord: " << nextCoord.first << " , " << nextCoord.second << std::endl;
@@ -385,8 +487,9 @@ class BotController
                 //clear path
                 std::cout << "Path Clear" << std::endl;
                 moveStr(nextStep);
+                preemptWall(nextStep); //update wall pre-emptively while moving between coordinates.
             } else {
-                std::cout << "Path Blocked Path Blocked Path Blocked Path Blocked Path Blocked" << std::endl;
+                std::cout << "=========================== Path Blocked ===========================" << std::endl;
                 //FIXME: Check this
                 if (checkBotReached(posX,posY,nextCoord)){ //if reached
                     moveStr(STOP); //with aStar should stop? but should continue to the intended coord if not yet there?
