@@ -27,8 +27,8 @@ typedef std::pair<int,int> coord;
 #define GRID_ROW_X_MAX 9
 #define GRID_COL_Y_MAX 9
 
-#define GOAL_ROW_X 4
-#define GOAL_COL_Y 4
+#define GOAL_ROW_X 1
+#define GOAL_COL_Y 1
 
 #define START_X 0
 #define START_Y 0
@@ -167,7 +167,7 @@ class pathfinderAlgo{
         }
     }
 
-    void updateWall(coord curCoord, int wallDirection){
+    void updateWall(coord curCoord, int wallDirection, bool hasWall){
         //update grid with wall
         int row = curCoord.first; //x
         int col = curCoord.second; //y
@@ -177,29 +177,29 @@ class pathfinderAlgo{
             if (curCoord.second == GRID_COL_Y_MAX-1) { // at boundary
                 break;
             }
-            grid[row][col].wallUp = true;
-            grid[row][col+1].wallDown = true;
+            grid[row][col].wallUp = hasWall;
+            grid[row][col+1].wallDown = hasWall;
 		break;
 		case DOWN:
             if (curCoord.second == 0) { // at boundary
                 break;
             }
-            grid[row][col].wallDown = true;
-            grid[row][col-1].wallUp = true;
+            grid[row][col].wallDown = hasWall;
+            grid[row][col-1].wallUp = hasWall;
 		break;
         case LEFT:
             if (curCoord.first == 0) { // at boundary
                 break;
             }
-            grid[row][col].wallLeft = true;
-            grid[row-1][col].wallRight = true;
+            grid[row][col].wallLeft = hasWall;
+            grid[row-1][col].wallRight = hasWall;
 		break;
 		case RIGHT:
             if (curCoord.first == GRID_ROW_X_MAX-1) { // at boundary
                 break;
             }
-            grid[row][col].wallRight = true;
-            grid[row+1][col].wallLeft = true;
+            grid[row][col].wallRight = hasWall;
+            grid[row+1][col].wallLeft = hasWall;
 		break;
 	    }
         std::cout << "Updated walls" << std::endl;

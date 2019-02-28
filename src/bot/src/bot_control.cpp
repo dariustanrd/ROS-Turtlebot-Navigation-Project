@@ -66,6 +66,7 @@ class BotController
     double laserL, laserM, laserR;
 
     bool preemptedWall;
+    int numMoves;
 
     geometry_msgs::Twist cmd;
     double linear_cmd, yaw_cmd;
@@ -88,10 +89,12 @@ class BotController
         laserR = MAX_DEPTH;
         preemptedWall = false;
         reachedGoalOnce = false;
+        numMoves = 0;
 
         curCoord = startCoord;
         algo = pathfinderAlgo();
         nextCoord = algo.aStar(startCoord);
+        // preemptWall(UP);
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
         laser_sub = nh.subscribe("scan_info", 1, &BotController::laserCallback, this);
@@ -350,22 +353,22 @@ class BotController
         return false;
     }
 
-    bool movedHalfway(int direction) {
+    bool movedDistance(int direction, double dist) {
         switch (direction) {
             case UP:
-                if (posY - curCoord.second > 0.5)
+                if (posY - curCoord.second > dist)
                     return true;
                 break;
             case DOWN:
-                if (curCoord.second - posY > 0.5)
+                if (curCoord.second - posY > dist)
                     return true;
                 break;
             case LEFT:
-                if (curCoord.first - posX > 0.5)
+                if (curCoord.first - posX > dist)
                     return true;
                 break;
             case RIGHT:
-                if (posX - curCoord.first > 0.5)
+                if (posX - curCoord.first > dist)
                     return true;
                 break;
         }
@@ -373,6 +376,8 @@ class BotController
     }
 
     void preemptWall(int direction) {
+        //FIXME: Currently doesnt work for the very first coord to move towards.
+
         // if moved halfway between the coordinates & preempted == false;
             // preempted = true; // to make it run only once when halfway between coordinates.
             // if current face UP
@@ -388,57 +393,71 @@ class BotController
                 // if laser left < 1, updateWall(nextCoord, UP)
                 // if laser right < 1, updateWall(nextCoord, DOWN)
         // then when it reaches the next coord and runs aStar again, it will realise there is a wall somewhere without turning towards it.
-        if (!preemptedWall && movedHalfway(direction)) {
-            std::cout << "Preempting wall along direction: " << direction << std::endl;
-            switch (direction) {
-                case UP:
-                // std::cout << "In case UP" << std::endl;
-                    if (laserL <= 1) {
-                        // std::cout << "In laserL <=1" << std::endl;
-                        algo.updateWall(nextCoord, LEFT);
-                        std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    if (laserR <= 1) {
-                        // std::cout << "In laserR <=1" << std::endl;
-                        algo.updateWall(nextCoord, RIGHT);
-                        std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    break;
-                case DOWN:
-                // std::cout << "In case DOWN" << std::endl;
-                    if (laserL <= 1) {
-                        algo.updateWall(nextCoord, RIGHT);
-                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    if (laserR <= 1) {
-                        algo.updateWall(nextCoord, LEFT);
-                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    break;
-                case LEFT:
-                // std::cout << "In case LEFT" << std::endl;
-                    if (laserL <= 1) {
-                        algo.updateWall(nextCoord, DOWN);
-                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    if (laserR <= 1) {
-                        algo.updateWall(nextCoord, UP);
-                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    break;
-                case RIGHT:
-                // std::cout << "In case RIGHT" << std::endl;
-                    if (laserL <= 1) {
-                        algo.updateWall(nextCoord, UP);
-                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    if (laserR <= 1) {
-                        algo.updateWall(nextCoord, DOWN);
-                        // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
-                    }
-                    break;
-            }
-            preemptedWall = true;
+        
+        std::cout << "Preempting wall along direction: " << direction << std::endl;
+        switch (direction) {
+            case UP:
+            // std::cout << "In case UP" << std::endl;
+                if (laserL <= 1) {
+                    // std::cout << "In laserL <=1" << std::endl;
+                    algo.updateWall(nextCoord, LEFT, true);
+                    std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, LEFT, false);
+                }
+                if (laserR <= 1) {
+                    // std::cout << "In laserR <=1" << std::endl;
+                    algo.updateWall(nextCoord, RIGHT, true);
+                    std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, RIGHT, false);
+                }
+                break;
+            case DOWN:
+            // std::cout << "In case DOWN" << std::endl;
+                if (laserL <= 1) {
+                    algo.updateWall(nextCoord, RIGHT, true);
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, RIGHT, false);
+                }
+                if (laserR <= 1) {
+                    algo.updateWall(nextCoord, LEFT, true);
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, LEFT, false);
+                }
+                break;
+            case LEFT:
+            // std::cout << "In case LEFT" << std::endl;
+                if (laserL <= 1) {
+                    algo.updateWall(nextCoord, DOWN, true);
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, DOWN, false);
+                }
+                if (laserR <= 1) {
+                    algo.updateWall(nextCoord, UP, true);
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, UP, false);
+                }
+                break;
+            case RIGHT:
+            // std::cout << "In case RIGHT" << std::endl;
+                if (laserL <= 1) {
+                    algo.updateWall(nextCoord, UP, true);
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, UP, false);
+                }
+                if (laserR <= 1) {
+                    algo.updateWall(nextCoord, DOWN, true);
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                } else { 
+                    algo.updateWall(nextCoord, DOWN, false);
+                }
+                break;
         }
     }
     void poseCallback(const std_msgs::Float64MultiArray::ConstPtr& pose_data) {
@@ -471,9 +490,10 @@ class BotController
                 curCoord = getCoord(posX, posY);
                 // nextCoord = pathfinder(curCoord, goalCoord); //this is for testing only
                 nextCoord = algo.aStar(curCoord); //use aStar algo to get the nextCoord
-                std::cout << "Next Coord" << std::endl;
+                std::cout << " ============ Got Next Coord ============" << std::endl;
                 movedFlag = true;
                 preemptedWall = false;
+                numMoves++;
             }
             nextStep = checkCoordFace(curCoord, nextCoord);
             std::cout << "Next Coord: " << nextCoord.first << " , " << nextCoord.second << std::endl;
@@ -487,7 +507,11 @@ class BotController
                 //clear path
                 std::cout << "Path Clear" << std::endl;
                 moveStr(nextStep);
-                preemptWall(nextStep); //update wall pre-emptively while moving between coordinates.
+                //FIXME: only run preemptive wall detection for 2nd move onwards. -- 1st move detects wrongly -> maybe cos of not being centred in grid at start? 
+                if (!preemptedWall && movedDistance(nextStep, 0.5) && numMoves != 0) {
+                    preemptWall(nextStep); //update wall pre-emptively while moving between coordinates.
+                    preemptedWall = true; //only run once
+                }
             } else {
                 std::cout << "=========================== Path Blocked ===========================" << std::endl;
                 //FIXME: Check this
@@ -497,7 +521,7 @@ class BotController
                     moveStr(nextStep); // continue moving to the coordinate
                 }
                 curCoord = getCoord(posX, posY);
-                algo.updateWall(curCoord, nextStep); //update astar algo with wall
+                algo.updateWall(curCoord, nextStep, true); //update astar algo with wall
                 nextCoord = algo.aStar(curCoord); // get updated nextCoord
             }
 
