@@ -196,10 +196,10 @@ class pathfinderAlgo{
     			grid[i][j].wallRight = (j==col-1) ? true : false;
     			grid[i][j].wallLeft = (j==0) ? true : false;
     			//main 4
-    			setCoordinate(&grid[i][j].gridUp, i+1, j);
-    			setCoordinate(&grid[i][j].gridDown, i-1, j);
-    			setCoordinate(&grid[i][j].gridRight, i, j+1);
-    			setCoordinate(&grid[i][j].gridLeft, i, j-1);
+    			setCoordinate(&grid[i][j].neighbourUp, i+1, j);
+    			setCoordinate(&grid[i][j].neighbourDown, i-1, j);
+    			setCoordinate(&grid[i][j].neighbourRight, i, j+1);
+    			setCoordinate(&grid[i][j].neighbourLeft, i, j-1);
     			//other 4
     			// setCoordinate(&grid[i][j].gridNW, i+1, j-1);
     			// setCoordinate(&grid[i][j].gridNE, i+1, j+1);
@@ -312,16 +312,16 @@ class pathfinderAlgo{
     void updateSurroundingWall(coord focusCoordinate){
     	cell focus = grid[focusCoordinate.first][focusCoordinate.second];
 
-    	cell &focusUp = grid[focus.gridUp.first][focus.gridUp.second];
+    	cell &focusUp = grid[focus.neighbourUp.first][focus.neighbourUp.second];
     	if (focusUp.wallDown == false && focusUp.value == 555) focusUp.value = focus.value + 1;
 
-    	cell &focusDown = grid[focus.gridDown.first][focus.gridDown.second];
+    	cell &focusDown = grid[focus.neighbourDown.first][focus.neighbourDown.second];
     	if (focusDown.wallUp == false && focusDown.value == 555) focusDown.value = focus.value + 1;
 
-    	cell &focusRight = grid[focus.gridRight.first][focus.gridRight.second];
+    	cell &focusRight = grid[focus.neighbourRight.first][focus.neighbourRight.second];
     	if (focusRight.wallLeft == false && focusRight.value == 555) focusRight.value = focus.value + 1;
 
-    	cell &focusLeft = grid[focus.gridLeft.first][focus.gridLeft.second];
+    	cell &focusLeft = grid[focus.neighbourLeft.first][focus.neighbourLeft.second];
     	if (focusLeft.wallRight == false && focusLeft.value == 555) focusLeft.value = focus.value + 1;
     }
 
@@ -417,10 +417,10 @@ class pathfinderAlgo{
       while (!openSet.empty()){//stack is not empty
     		cell spot = grid[openSet.front().first][openSet.front().second];
 
-    		up = spot.gridUp;
-    		down = spot.gridDown;
-    		right = spot.gridRight;
-    		left = spot.gridLeft;
+    		up = spot.neighbourUp;
+    		down = spot.neighbourDown;
+    		right = spot.neighbourRight;
+    		left = spot.neighbourLeft;
 
       	if(spot.wallUp == false && up.first < 9 && grid[up.first][up.second].value == 555)
     			openSet.push_back(up);
