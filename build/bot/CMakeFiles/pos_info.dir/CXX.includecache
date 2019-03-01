@@ -11,6 +11,8 @@ ros/ros.h
 -
 nav_msgs/Odometry.h
 -
+geometry_msgs/PoseWithCovarianceStamped.h
+-
 tf/transform_datatypes.h
 -
 std_msgs/Float64MultiArray.h
@@ -108,6 +110,26 @@ ros/builtin_message_traits.h
 ros/message_operations.h
 -
 geometry_msgs/Pose.h
+-
+
+/opt/ros/kinetic/include/geometry_msgs/PoseWithCovarianceStamped.h
+string
+-
+vector
+-
+map
+-
+ros/types.h
+-
+ros/serialization.h
+-
+ros/builtin_message_traits.h
+-
+ros/message_operations.h
+-
+std_msgs/Header.h
+-
+geometry_msgs/PoseWithCovariance.h
 -
 
 /opt/ros/kinetic/include/geometry_msgs/Quaternion.h

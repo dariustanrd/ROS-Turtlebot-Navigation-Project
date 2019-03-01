@@ -7,6 +7,7 @@ bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometr
 bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/Pose.h
 bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/PoseStamped.h
 bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/PoseWithCovariance.h
+bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/PoseWithCovarianceStamped.h
 bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/Quaternion.h
 bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/QuaternionStamped.h
 bot/CMakeFiles/pos_info.dir/src/pos_info.cpp.o: /opt/ros/kinetic/include/geometry_msgs/Transform.h

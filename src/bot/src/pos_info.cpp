@@ -6,6 +6,7 @@
 
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf/transform_datatypes.h>
 #include <std_msgs/Float64MultiArray.h>
 
@@ -25,11 +26,13 @@ private:
 
 public:
 	InfoReader(ros::NodeHandle &nh){
-		pos_sub = nh.subscribe("/odom",1, &InfoReader::callback, this);
+		// pos_sub = nh.subscribe("/odom",1, &InfoReader::callback, this);
+		pos_sub = nh.subscribe("/robot_pose_ekf/odom_combined",1, &InfoReader::callback, this);
 		pos_info = nh.advertise< std_msgs::Float64MultiArray >("pos_info", 1);
 	}
 
-	void callback( const nav_msgs::OdometryConstPtr& poseMsg){
+	// void callback( const nav_msgs::OdometryConstPtr& poseMsg){
+	void callback( const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& poseMsg){
 		// Changed positive pose on map:
 		//  Y
 		//  |
