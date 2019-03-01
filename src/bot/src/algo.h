@@ -20,15 +20,11 @@ typedef std::pair<int,int> coord;
 #define LEFT 3
 #define RIGHT 4
 
-
-// TODO: Can try to use a 90 x 90 grid instead and move at 0.1m each time. 
-// Then allow for diagonal movement? How to make smoothing of turns?
-
 #define GRID_ROW_X_MAX 9
 #define GRID_COL_Y_MAX 9
 
-#define GOAL_ROW_X 1
-#define GOAL_COL_Y 1
+#define GOAL_ROW_X 4
+#define GOAL_COL_Y 4
 
 #define START_X 0
 #define START_Y 0
@@ -174,28 +170,32 @@ class pathfinderAlgo{
 
         switch (wallDirection){
 		case UP:
-            if (curCoord.second == GRID_COL_Y_MAX-1) { // at boundary
+            if (curCoord.second == GRID_COL_Y_MAX-1) { //Exception handling for boundary case
+                // std::cout << "Boundary Case" << std::endl;
                 break;
             }
             grid[row][col].wallUp = hasWall;
             grid[row][col+1].wallDown = hasWall;
 		break;
 		case DOWN:
-            if (curCoord.second == 0) { // at boundary
+            if (curCoord.second == 0) { //Exception handling for boundary case
+                // std::cout << "Boundary Case" << std::endl;
                 break;
             }
             grid[row][col].wallDown = hasWall;
             grid[row][col-1].wallUp = hasWall;
 		break;
         case LEFT:
-            if (curCoord.first == 0) { // at boundary
+            if (curCoord.first == 0) { //Exception handling for boundary case
+                // std::cout << "Boundary Case" << std::endl;
                 break;
             }
             grid[row][col].wallLeft = hasWall;
             grid[row-1][col].wallRight = hasWall;
 		break;
 		case RIGHT:
-            if (curCoord.first == GRID_ROW_X_MAX-1) { // at boundary
+            if (curCoord.first == GRID_ROW_X_MAX-1) { //Exception handling for boundary case
+                // std::cout << "Boundary Case" << std::endl;
                 break;
             }
             grid[row][col].wallRight = hasWall;
@@ -225,35 +225,49 @@ class pathfinderAlgo{
         }
         return lowest;
     }
-    
+    bool checkValid(coord testCoord) {
+        return (testCoord.first >= 0) && (testCoord.first < GRID_ROW_X_MAX) 
+        && (testCoord.second >= 0) && (testCoord.second < GRID_ROW_X_MAX);
+    }
     coord aStar(coord pointCoord){
         //full algo
-        std::cout << "Start AStar" << std::endl;
+        std::cout << "********* Start AStar *********" << std::endl;
+
+        if (!checkValid(pointCoord)) { //Exception handling for boundary case
+            std::cout << "********* Invalid coordinate passed to aStar *********" << std::endl;
+            return pointCoord;
+        }
+
+        if (pointCoord == goalCoord) { //Exception handling
+            std::cout << "********* Already at goal *********" << std::endl;
+            return pointCoord;
+        }
+        
         coord currentCoord, nextCoord;
         openSet.insert(pointCoord);
-        std::cout << "Inserted pointCoord to openSet: " << pointCoord.first << " " << pointCoord.second << std::endl;
+        // std::cout << "Inserted pointCoord to openSet: " << pointCoord.first << " " << pointCoord.second << std::endl;
 
         grid[pointCoord.first][pointCoord.second].g = 0;
         grid[pointCoord.first][pointCoord.second].h = manhattanDist(pointCoord, goalCoord);
         grid[pointCoord.first][pointCoord.second].f = grid[pointCoord.first][pointCoord.second].h + grid[pointCoord.first][pointCoord.second].g;
         while(!openSet.empty()) {
-            std::cout << "In while openSet empty loop" << std::endl;
+            // std::cout << "In while openSet empty loop" << std::endl;
             
             // currentCoord = lowest value f in openset
             currentCoord = lowestF();
-            std::cout << "Current coord with lowest f: " << currentCoord.first << " " << currentCoord.second << std::endl;
+            // std::cout << "Current coord with lowest f: " << currentCoord.first << " " << currentCoord.second << std::endl;
             
             if (currentCoord == goalCoord) {
-                std::cout << "Found Path" << std::endl;
+                std::cout << "********* Found Path *********" << std::endl;
                 nextCoord = retrace(pointCoord);
                 std::cout << "Next Coord: " << nextCoord.first << " " << nextCoord.second << std::endl;
                 return nextCoord; // - retrace path back to pointCoord, give next coord;
             }
 
             openSet.erase(openSet.find(currentCoord)); // remove currentCoord from openSet
-            std::cout << "Erased current coord in openSet" << std::endl;
+            // std::cout << "Erased current coord in openSet" << std::endl;
             closeSet.insert(currentCoord);
-            std::cout << "Insert current coord in closeSet" << std::endl;
+            // std::cout << "Insert current coord in closeSet" << std::endl;
 
             cell spot = grid[currentCoord.first][currentCoord.second];
             
@@ -263,52 +277,52 @@ class pathfinderAlgo{
             neighbours[2] = spot.neighbourLeft;
             neighbours[3] = spot.neighbourRight;
             for (int i = 0; i < 4; ++i) {
-                std::cout << "In for neighbours loop: " << i << std::endl;
+                // std::cout << "In for neighbours loop: " << i << std::endl;
                 if ((i == 0) && ((spot.wallUp) || (spot.neighbourUp == OBCoord))) {
-                    std::cout << "Invalid UP" << std::endl;
+                    // std::cout << "Invalid UP" << std::endl;
                     continue;
                 }
                 if ((i == 1) && ((spot.wallDown) || (spot.neighbourDown == OBCoord))) {
-                    std::cout << "Invalid DOWN" << std::endl;
+                    // std::cout << "Invalid DOWN" << std::endl;
                     continue;
                 }
                 if ((i == 2) && ((spot.wallLeft) || (spot.neighbourLeft == OBCoord))) {
-                    std::cout << "Invalid LEFT" << std::endl;
+                    // std::cout << "Invalid LEFT" << std::endl;
                     continue;
                 }
                 if ((i == 3) && ((spot.wallRight) || (spot.neighbourRight == OBCoord))) {
-                    std::cout << "Invalid RIGHT" << std::endl;
+                    // std::cout << "Invalid RIGHT" << std::endl;
                     continue;
                 }
-                std::cout << "Current open set: " << std::endl;
-                for (auto it2 = openSet.begin(); it2 != openSet.end(); ++it2) {
-                    std::cout << it2->first << " " << it2->second << std::endl;
-                }
+                // std::cout << "Current open set: " << std::endl;
+                // for (auto it2 = openSet.begin(); it2 != openSet.end(); ++it2) {
+                //     std::cout << it2->first << " " << it2->second << std::endl;
+                // }
                 if(!closeSet.count(neighbours[i])) {
                     //FIXME: check g/f value comparison
                     int temp = spot.g + manhattanDist(currentCoord, neighbours[i]);
                     bool newPath = false;
-                    std::cout << "Neighbour coord: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
+                    // std::cout << "Neighbour coord: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
                     if (openSet.find(neighbours[i]) != openSet.end()) {
-                        std::cout << "Neighbour found in openSet: " <<  neighbours[i].first << " " << neighbours[i].second  << std::endl;
+                        // std::cout << "Neighbour found in openSet: " <<  neighbours[i].first << " " << neighbours[i].second  << std::endl;
                         //FIXME: check g/f value comparison
                         if (temp < grid[neighbours[i].first][neighbours[i].second].g) {
-                            std::cout << "Current f score < neighbour g score" << std::endl;
+                            // std::cout << "Current f score < neighbour g score" << std::endl;
                             grid[neighbours[i].first][neighbours[i].second].g = temp;
                             newPath = true;
                         } else {
-                            std::cout << "Current f score > neighbour g score" << std::endl;
+                            // std::cout << "Current f score > neighbour g score" << std::endl;
                         }
                     } else {
-                        std::cout << "Neighbour not found in openSet" << std::endl;
+                        // std::cout << "Neighbour not found in openSet" << std::endl;
                         grid[neighbours[i].first][neighbours[i].second].g = temp;
                         newPath = true;
                         openSet.insert(neighbours[i]);
-                        std::cout << "Inserted neighbour direction " << i <<" to openSet: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
-                        std::cout << "Current open set: " << std::endl;
-                        for (auto it3 = openSet.begin(); it3 != openSet.end(); ++it3) {
-                            std::cout << it3->first << " " << it3->second << std::endl;
-                        }
+                        // std::cout << "Inserted neighbour direction " << i <<" to openSet: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
+                        // std::cout << "Current open set: " << std::endl;
+                        // for (auto it3 = openSet.begin(); it3 != openSet.end(); ++it3) {
+                        //     std::cout << it3->first << " " << it3->second << std::endl;
+                        // }
                     }
                     if (newPath) {
                         grid[neighbours[i].first][neighbours[i].second].h = manhattanDist(neighbours[i], goalCoord);
