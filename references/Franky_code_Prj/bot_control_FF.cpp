@@ -556,7 +556,7 @@ class BotController
                     // nextCoord = pathfinder(curCoord, goalCoord); //this is for testing only
                     // nextCoord = algo.aStar(curCoord); //use aStar algo to get the nextCoord
                     nextCoord = algo.floodFill(curCoord); //use aStar algo to get the nextCoord
-
+                    if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) algo.setLastPosition(myRound(initX), myRound(initY));
                     std::cout << " ============ Got Next Coord ============" << std::endl;
                     movedFlag = true;
                     preemptedWall = false;
@@ -603,6 +603,7 @@ class BotController
                 }
 
             }
+            
         }
     };
 

@@ -176,6 +176,7 @@ class pathfinderAlgo{
 
     void setLastPosition(int x, int y){
     	setCoordinate(&lastPosition, x, y);
+      std::cout<< "lastposition="<< lastPosition.first<<"____"<<lastPosition.second <<std::endl;
     }
 
 
@@ -191,15 +192,15 @@ class pathfinderAlgo{
     	openSet.clear();
     	for(int i=0; i<numRow; i++){
     		for(int j=0; j<numCol; j++){
-    			grid[i][j].wallUp = (i==row-1) ? true : false;
-    			grid[i][j].wallDown = (i==0) ? true : false;
-    			grid[i][j].wallRight = (j==col-1) ? true : false;
-    			grid[i][j].wallLeft = (j==0) ? true : false;
+    			grid[i][j].wallUp = (j==row-1) ? true : false;
+    			grid[i][j].wallDown = (j==0) ? true : false;
+    			grid[i][j].wallRight = (i==col-1) ? true : false;
+    			grid[i][j].wallLeft = (i==0) ? true : false;
     			//main 4
-    			setCoordinate(&grid[i][j].neighbourUp, i+1, j);
-    			setCoordinate(&grid[i][j].neighbourDown, i-1, j);
-    			setCoordinate(&grid[i][j].neighbourRight, i, j+1);
-    			setCoordinate(&grid[i][j].neighbourLeft, i, j-1);
+    			setCoordinate(&grid[i][j].neighbourUp, i, j+1);
+    			setCoordinate(&grid[i][j].neighbourDown, i, j-1);
+    			setCoordinate(&grid[i][j].neighbourRight, i+1, j);
+    			setCoordinate(&grid[i][j].neighbourLeft, i-1, j);
     			//other 4
     			// setCoordinate(&grid[i][j].gridNW, i+1, j-1);
     			// setCoordinate(&grid[i][j].gridNE, i+1, j+1);
