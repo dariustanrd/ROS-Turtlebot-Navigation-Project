@@ -1,7 +1,7 @@
 //************************************************************************************************************************************//
 // Node to return depth information from Laserscan for Left, Middle, Right
 // From online sources
-// Edited by: Darius Tan
+// Edited by: Darius Tan & Franky Laurentis
 //************************************************************************************************************************************//
 
 #include <ros/ros.h>

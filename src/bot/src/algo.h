@@ -1,6 +1,6 @@
 //************************************************************************************************************************************//
 // Search algo file. For generating next grid coord
-// Edited by: Darius Tan
+// Edited by: Darius Tan & Franky Laurentis
 //************************************************************************************************************************************//
 #include <deque>
 #include <queue>
@@ -208,9 +208,11 @@ class pathfinderAlgo{
         coord next, parent;
         next = goalCoord;
         parent = goalCoord;
+        std::cout << "Retraced path: " << std::endl;
         while (parent.first != point.first || parent.second != point.second) {
             next = parent;
             parent = grid[next.first][next.second].previous;
+            std::cout << next.first << " , " << next.second << std::endl;
         }
         return next;
     }
