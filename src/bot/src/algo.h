@@ -14,7 +14,7 @@ typedef std::pair<int,int> coord;
 // ALGO 0 - Flood Fill
 // ALGO 1 - A*
 
-#define ALGO 1
+#define ALGO 0
 //*********************************************************//
 
 #define STOP 0

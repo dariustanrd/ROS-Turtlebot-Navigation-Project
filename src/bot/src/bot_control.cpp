@@ -510,7 +510,8 @@ class BotController
                 std::cout << "Path Clear" << std::endl;
                 moveStr(nextStep);
                 //FIXME: only run preemptive wall detection for 2nd move onwards. -- 1st move detects wrongly -> maybe cos of not being centred in grid at start? 
-                if (!preemptedWall && movedDistance(nextStep, 0.5) && numMoves != 0) {
+                // if (!preemptedWall && movedDistance(nextStep, 0.5) && numMoves != 0) {
+                if (!preemptedWall && movedDistance(nextStep, 0.5)) {
                     preemptWall(nextStep); //update wall pre-emptively while moving between coordinates.
                     preemptedWall = true; //only run once
                 }

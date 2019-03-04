@@ -13,6 +13,8 @@ sensor_msgs/LaserScan.h
 -
 std_msgs/Float64MultiArray.h
 -
+deque
+-
 
 /opt/ros/kinetic/include/ros/advertise_options.h
 ros/forwards.h

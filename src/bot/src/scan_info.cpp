@@ -7,6 +7,9 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <deque> //testing
+
+#define HISTBUF 10
 
 static const float MAX_DEPTH = 5.0;
 static const float MIN_DEPTH = 0.4;
@@ -25,74 +28,101 @@ class depthScanner {
 
 		bool startup;
 
+		std::deque<float> scanHistLeft; //testing
+		std::deque<float> scanHistMid; //testing
+		std::deque<float> scanHistRight; //testing
+
 	public:
     depthScanner(ros::NodeHandle &nh){
-			scan_sub = nh.subscribe("/scan", 1, &depthScanner::scanCallback, this);
-			scan_info = nh.advertise< std_msgs::Float64MultiArray >("scan_info", 1);
-			startup = true;
+		scan_sub = nh.subscribe("/scan", 1, &depthScanner::scanCallback, this);
+		scan_info = nh.advertise< std_msgs::Float64MultiArray >("scan_info", 1);
+		startup = true;
+		for (int i = 0; i < HISTBUF; ++i) {
+			scanHistLeft.push_back(0);
+			scanHistMid.push_back(0);
+			scanHistRight.push_back(0);
 		}
-		void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
-			// float32 range_min        # minimum range value [m]
-			// float32 range_max        # maximum range value [m]
-			// float32 angle_min        # start angle of the scan [rad]
-			// float32 angle_max        # end angle of the scan [rad]
-			scan_vect = scan->ranges;
-			minRan = scan->range_min;
-			maxRan = scan->range_max;
-			minAng = scan->angle_min;
-			maxAng = scan->angle_max;
+	}
+	void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
+		// float32 range_min        # minimum range value [m]
+		// float32 range_max        # maximum range value [m]
+		// float32 angle_min        # start angle of the scan [rad]
+		// float32 angle_max        # end angle of the scan [rad]
+		scan_vect = scan->ranges;
+		minRan = scan->range_min;
+		maxRan = scan->range_max;
+		minAng = scan->angle_min;
+		maxAng = scan->angle_max;
 
-			// std::cout << "minRan: " << minRan << " maxRan: " << maxRan << " minAng: " << minAng << " maxAng: " << maxAng << std::endl;
+		// std::cout << "minRan: " << minRan << " maxRan: " << maxRan << " minAng: " << minAng << " maxAng: " << maxAng << std::endl;
 
-			int midIdx = (int)round(scan_vect.size() / 2.0);
-			scan_right = scan_vect.front();
-			scan_mid = scan_vect[midIdx];
-			scan_left = scan_vect.back();
+		int midIdx = (int)round(scan_vect.size() / 2.0);
+		scan_right = scan_vect.front();
+		scan_mid = scan_vect[midIdx];
+		scan_left = scan_vect.back();
 
-			if (startup) {
-				if (std::isnan(scan_left))
+		if (startup) {
+			if (std::isnan(scan_left))
+				send_left = MAX_DEPTH;
+			if (std::isnan(scan_mid))
+				send_mid = MAX_DEPTH;
+			if (std::isnan(scan_right))
+				send_right = MAX_DEPTH;
+			scanHistLeft.push_back(send_left); //testing
+			scanHistMid.push_back(send_mid); //testing
+			scanHistRight.push_back(send_right); //testing
+		}
+		else {
+			if (std::isnan(scan_left)) {
+				// if (send_left >= 2.0) //if was previously increasing
+				if (*scanHistLeft.begin() < *scanHistLeft.rbegin())
 					send_left = MAX_DEPTH;
-				if (std::isnan(scan_mid))
+				else if (*scanHistLeft.begin() == *scanHistLeft.rbegin())
+					send_left = send_left;
+				else
+					send_left = MIN_DEPTH;
+			} 
+			else
+				send_left = scan_left;
+			if (std::isnan(scan_mid)) {
+				// if (send_mid >= 2.0)
+				if (*scanHistMid.begin() < *scanHistMid.rbegin())
 					send_mid = MAX_DEPTH;
-				if (std::isnan(scan_right))
+				else if (*scanHistMid.begin() == *scanHistMid.rbegin())
+					send_mid = send_mid;
+				else
+					send_mid = MIN_DEPTH;
+			} 
+			else
+				send_mid = scan_mid;
+			if (std::isnan(scan_right)) {
+				// if (send_right >= 2.0)
+				if (*scanHistRight.begin() < *scanHistRight.rbegin())
 					send_right = MAX_DEPTH;
-				startup = false;
-			}
-			else {
-				if (std::isnan(scan_left)) {
-					if (send_left >= 2.0)
-						send_left = MAX_DEPTH;
-					else
-						send_left = MIN_DEPTH;
-				} 
+				else if (*scanHistRight.begin() == *scanHistRight.rbegin())
+					send_right = send_right;
 				else
-					send_left = scan_left;
-				if (std::isnan(scan_mid)) {
-					if (send_mid >= 2.0)
-						send_mid = MAX_DEPTH;
-					else
-						send_mid = MIN_DEPTH;
-				} 
-				else
-					send_mid = scan_mid;
-				if (std::isnan(scan_right)) {
-					if (send_right >= 2.0)
-						send_right = MAX_DEPTH;
-					else
-						send_right = MIN_DEPTH;
-				} 
-				else
-					send_right = scan_right;
-			}			
-			
-			std::cout << "Send Left: " << send_left << " Send Mid: " << send_mid << " Send Right: " << send_right << std::endl;
+					send_right = MIN_DEPTH;
+			} 
+			else
+				send_right = scan_right;
+			scanHistLeft.pop_front(); //testing
+			scanHistMid.pop_front(); //testing
+			scanHistRight.pop_front(); //testing
 
-			scan_msg.data.resize(3);
-			scan_msg.data[0] = send_left;
-    		scan_msg.data[1] = send_mid;
-    		scan_msg.data[2] = send_right;
-			scan_info.publish(scan_msg);
+			scanHistLeft.push_back(send_left); //testing
+			scanHistMid.push_back(send_mid); //testing
+			scanHistRight.push_back(send_right); //testing
 		}
+		startup = false;
+		std::cout << "Send Left: " << send_left << " Send Mid: " << send_mid << " Send Right: " << send_right << std::endl;
+
+		scan_msg.data.resize(3);
+		scan_msg.data[0] = send_left;
+		scan_msg.data[1] = send_mid;
+		scan_msg.data[2] = send_right;
+		scan_info.publish(scan_msg);
+	}
 };
 
 int main(int argc, char** argv){
