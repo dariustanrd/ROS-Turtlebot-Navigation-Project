@@ -125,7 +125,7 @@ class BotController
     bool checkObs() {
         // return true if obs detected
         if (depth <= DEPTH_LIM) {
-            std::cout << "Block depth: " << depth << std::endl;
+            // std::cout << "Block depth: " << depth << std::endl;
             return true;
         } else return false;
     }
@@ -138,7 +138,7 @@ class BotController
         case UP:
             if (posY - initY < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
-                std::cout << "Straight UP" << std::endl;
+                // std::cout << "Straight UP" << std::endl;
             }
             if (posX >= curCoord.first){
                 if (yaw <= 0){
@@ -160,7 +160,7 @@ class BotController
         case DOWN:
             if (initY - posY < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
-                std::cout << "Straight DOWN" << std::endl;
+                // std::cout << "Straight DOWN" << std::endl;
             }
             if (posX >= curCoord.first){
                 if (yaw <0 && yaw > -PI){
@@ -184,7 +184,7 @@ class BotController
         case LEFT:
             if (initX - posX < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
-                std::cout << "Straight LEFT" << std::endl;
+                // std::cout << "Straight LEFT" << std::endl;
             }
             if (posY >= curCoord.second) {
                 if (yaw <= PI/2){
@@ -206,7 +206,7 @@ class BotController
         case RIGHT:
             if (posX - initX < MOVE_DIST) {
                 linear_cmd = LIN_VEL;
-                std::cout << "Straight RIGHT" << std::endl;
+                // std::cout << "Straight RIGHT" << std::endl;
             }
             if (posY >= curCoord.second) {
                 if (yaw >= -PI/2){
@@ -230,7 +230,8 @@ class BotController
         }
         // For FF
         if (ALGO == 0) {
-            if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) algo.setLastPosition(myRound(initX), myRound(initY));
+            if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) 
+                algo.setLastPosition(myRound(initX), myRound(initY));
         }
         cmd.angular.z = yaw_cmd;
         cmd.linear.x = linear_cmd;
@@ -271,10 +272,10 @@ class BotController
             case UP:
                 // if current yaw near 0, stop. else if yaw negative, rotate ACW, if yaw positive, rotate CW
                 if (checkFace(UP)) {
-                    std::cout << "FACE UP OK" << std::endl;
+                    // std::cout << "FACE UP OK" << std::endl;
                     yaw_cmd = 0;
                 } else {
-                    std::cout << "MOVE FACE UP" << std::endl;
+                    // std::cout << "MOVE FACE UP" << std::endl;
                     if (yaw > 0) yaw_cmd = -YAW_VEL; //CW
                     if (yaw < 0) yaw_cmd = YAW_VEL; //ACW
                 }
@@ -282,10 +283,10 @@ class BotController
             case DOWN:
                 // if current yaw near PI | -PI, stop. else if yaw negative, rotate CW, if yaw positive, rotate ACW
                 if (checkFace(DOWN)) {
-                    std::cout << "FACE DOWN OK" << std::endl;
+                    // std::cout << "FACE DOWN OK" << std::endl;
                     yaw_cmd = 0;
                 } else {
-                    std::cout << "MOVE FACE DOWN" << std::endl;
+                    // std::cout << "MOVE FACE DOWN" << std::endl;
                     if (yaw < 0) yaw_cmd = -YAW_VEL; //CW
                     if (yaw > 0) yaw_cmd = YAW_VEL; //ACW
                 }
@@ -293,10 +294,10 @@ class BotController
             case LEFT:
                 // if current yaw near PI/2, stop. else if -PI/2 < yaw < PI /2, rotate ACW, if -PI < yaw < -PI/2 || PI/2 < yaw < PI, rotate CW
                 if (checkFace(LEFT)) {
-                    std::cout << "FACE LEFT OK" << std::endl;
+                    // std::cout << "FACE LEFT OK" << std::endl;
                     yaw_cmd = 0;
                 } else {
-                    std::cout << "MOVE FACE LEFT" << std::endl;
+                    // std::cout << "MOVE FACE LEFT" << std::endl;
                     if ((-PI < yaw && yaw < -PI/2) || (PI/2 < yaw && yaw < PI)) yaw_cmd = -YAW_VEL; //CW
                     if (-PI/2 < yaw && yaw < PI /2) yaw_cmd = YAW_VEL; //ACW
                 }
@@ -304,10 +305,10 @@ class BotController
             case RIGHT:
                 // if current yaw near -PI/2, stop. else if -PI/2 < yaw < PI /2, rotate CW, if -PI < yaw < -PI/2 || PI/2 < yaw < PI, rotate ACW
                 if (checkFace(RIGHT)) {
-                    std::cout << "FACE RIGHT OK" << std::endl;
+                    // std::cout << "FACE RIGHT OK" << std::endl;
                     yaw_cmd = 0;
                 } else {
-                    std::cout << "MOVE FACE RIGHT" << std::endl;
+                    // std::cout << "MOVE FACE RIGHT" << std::endl;
                     if (-PI/2 < yaw && yaw < PI /2) yaw_cmd = -YAW_VEL; //CW
                     if ((-PI < yaw && yaw < -PI/2) || (PI/2 < yaw && yaw < PI)) yaw_cmd = YAW_VEL; //ACW
                 }
@@ -391,21 +392,21 @@ class BotController
                 // if laser right < 1, updateWall(nextCoord, DOWN)
         // then when it reaches the next coord and runs aStar again, it will realise there is a wall somewhere without turning towards it.
         
-        std::cout << "Preempting wall along direction: " << direction << std::endl;
+        // std::cout << "Preempting wall along direction: " << direction << std::endl;
         switch (direction) {
             case UP:
             // std::cout << "In case UP" << std::endl;
                 if (laserL <= 1) {
                     // std::cout << "In laserL <=1" << std::endl;
                     algo.updateWall(nextCoord, LEFT, true);
-                    std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
                 } else { 
                     algo.updateWall(nextCoord, LEFT, false);
                 }
                 if (laserR <= 1) {
                     // std::cout << "In laserR <=1" << std::endl;
                     algo.updateWall(nextCoord, RIGHT, true);
-                    std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
+                    // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
                 } else { 
                     algo.updateWall(nextCoord, RIGHT, false);
                 }
@@ -479,7 +480,7 @@ class BotController
                 ros::Duration timeGoal = goalReached - begin;
                 double timeGoalSec = timeGoal.toSec();
                 std::cout << "=========================== Reached Goal Coordinate ===========================" << std::endl;
-                std::cout << "Time Taken: " << timeGoalSec << std::endl;
+                std::cout << "Time Taken: " << timeGoalSec << "s" << std::endl;
                 reachedGoalOnce = true;
             }
         } else {
@@ -490,7 +491,8 @@ class BotController
                 } else if (ALGO == 0) {
                     // For FF
                     nextCoord = algo.floodFill(curCoord);
-                    if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) algo.setLastPosition(myRound(initX), myRound(initY));
+                    if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) 
+                        algo.setLastPosition(myRound(initX), myRound(initY));
                 }
                 std::cout << " ============ Got Next Coord ============" << std::endl;
                 movedFlag = true;
@@ -498,16 +500,16 @@ class BotController
                 numMoves++;
             }
             nextStep = checkCoordFace(curCoord, nextCoord);
-            std::cout << "Next Coord: " << nextCoord.first << " , " << nextCoord.second << std::endl;
-            std::cout << "Next Step: " << nextStep << std::endl;
+            // std::cout << "Next Coord: " << nextCoord.first << " , " << nextCoord.second << std::endl;
+            // std::cout << "Next Step: " << nextStep << std::endl;
 
             if (!checkFace(nextStep)) {
-                std::cout << "Move to Correct Face" << std::endl;
+                // std::cout << "Move to Correct Face" << std::endl;
                 moveStr(STOP);
                 moveFace(nextStep);
             } else if (!checkObs()) {
                 //clear path
-                std::cout << "Path Clear" << std::endl;
+                // std::cout << "Path Clear" << std::endl;
                 moveStr(nextStep);
                 //FIXME: only run preemptive wall detection for 2nd move onwards. -- 1st move detects wrongly -> maybe cos of not being centred in grid at start? 
                 // if (!preemptedWall && movedDistance(nextStep, 0.5) && numMoves != 0) {

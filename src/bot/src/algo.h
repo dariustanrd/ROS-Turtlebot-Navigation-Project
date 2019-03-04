@@ -14,7 +14,7 @@ typedef std::pair<int,int> coord;
 // ALGO 0 - Flood Fill
 // ALGO 1 - A*
 
-#define ALGO 0
+#define ALGO 1
 //*********************************************************//
 
 #define STOP 0
@@ -129,7 +129,7 @@ class pathfinderAlgo{
                 grid[i][j].previous = std::make_pair(0, 0);
 
                 if (ALGO == 1) { // aStar algo
-                    //FIXME: check g/f value comparison
+                    //g value set as 1 for all grids --> cost of moving between grids is the same
                     grid[i][j].g = 1;
                     grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
                     grid[i][j].f = grid[i][j].g + grid[i][j].h;
@@ -155,7 +155,7 @@ class pathfinderAlgo{
                 grid[i][j].previous = std::make_pair(0, 0);
 
                 if (ALGO == 1) { // aStar algo
-                    //FIXME: check g/f value comparison
+                    //g value set as 1 for all grids --> cost of moving between grids is the same
                     grid[i][j].g = 1;
                     grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
                     grid[i][j].f = grid[i][j].g + grid[i][j].h;
@@ -222,17 +222,17 @@ class pathfinderAlgo{
             grid[row+1][col].wallLeft = hasWall;
 		break;
 	    }
-        std::cout << "Updated walls" << std::endl;
+        // std::cout << "Updated walls" << std::endl;
     }
     coord retrace(coord point) {
         coord next, parent;
         next = goalCoord;
         parent = goalCoord;
-        std::cout << "Retraced path: " << std::endl;
+        // std::cout << "Retraced path: " << std::endl;
         while (parent.first != point.first || parent.second != point.second) {
             next = parent;
             parent = grid[next.first][next.second].previous;
-            std::cout << next.first << " , " << next.second << std::endl;
+            // std::cout << next.first << " , " << next.second << std::endl;
         }
         return next;
     }
