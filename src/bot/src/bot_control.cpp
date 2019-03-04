@@ -93,8 +93,12 @@ class BotController
 
         curCoord = startCoord;
         algo = pathfinderAlgo();
-        nextCoord = algo.aStar(startCoord);
-        // preemptWall(UP);
+        if (ALGO == 1) {
+            nextCoord = algo.aStar(startCoord);
+        } else if (ALGO == 0) {
+           // For FF
+           nextCoord = algo.floodFill(startCoord); 
+        }
 
         depth_sub = nh.subscribe("depth_info", 1, &BotController::depthCallback, this);
         laser_sub = nh.subscribe("scan_info", 1, &BotController::laserCallback, this);
@@ -107,17 +111,6 @@ class BotController
         laserL = laser_data -> data[0];
         laserM = laser_data -> data[1];
         laserR = laser_data -> data[2];
-
-        // Dont need this since will never be nan as per scan_info
-        // if (std::isnan(laserL)) {
-        //     laserL = MIN_DEPTH;
-        // }
-        // if (std::isnan(laserM)) {
-        //     laserM = MIN_DEPTH;
-        // }
-        // if (std::isnan(laserR)) {
-        //     laserR = MIN_DEPTH;
-        // }
         // std::cout << "laserL: " << laserL << "laserM: " << laserM << "laserR: " << laserR << std::endl;
     }
 
@@ -234,6 +227,10 @@ class BotController
             break;
         default:
             break;
+        }
+        // For FF
+        if (ALGO == 0) {
+            if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) algo.setLastPosition(myRound(initX), myRound(initY));
         }
         cmd.angular.z = yaw_cmd;
         cmd.linear.x = linear_cmd;
@@ -488,8 +485,13 @@ class BotController
         } else {
             if (checkBotReached(posX,posY,nextCoord)) { //have reached next step. Get next coord.
                 curCoord = getCoord(posX, posY);
-                // nextCoord = pathfinder(curCoord, goalCoord); //this is for testing only
-                nextCoord = algo.aStar(curCoord); //use aStar algo to get the nextCoord
+                if (ALGO == 1) {
+                    nextCoord = algo.aStar(curCoord); //use aStar algo to get the nextCoord
+                } else if (ALGO == 0) {
+                    // For FF
+                    nextCoord = algo.floodFill(curCoord);
+                    if(myRound(posX)!=myRound(initX) || myRound(posY)!=myRound(initY)) algo.setLastPosition(myRound(initX), myRound(initY));
+                }
                 std::cout << " ============ Got Next Coord ============" << std::endl;
                 movedFlag = true;
                 preemptedWall = false;
@@ -522,9 +524,13 @@ class BotController
                 }
                 curCoord = getCoord(posX, posY);
                 algo.updateWall(curCoord, nextStep, true); //update astar algo with wall
-                nextCoord = algo.aStar(curCoord); // get updated nextCoord
+                if(ALGO == 1) {
+                    nextCoord = algo.aStar(curCoord); // get updated nextCoord
+                } else if (ALGO == 0) {
+                    // For FF
+                    nextCoord = algo.floodFill(curCoord); // get updated nextCoord
+                }
             }
-
         }
     }
 };

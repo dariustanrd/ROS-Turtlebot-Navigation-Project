@@ -9,11 +9,7 @@
 /home/darius/ROS_Workspaces/proj1_ws/src/bot/src/algo.h
 deque
 -
-queue
--
 set
--
-unordered_set
 -
 boost/unordered_set.hpp
 -

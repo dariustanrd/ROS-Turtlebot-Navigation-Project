@@ -3,16 +3,19 @@
 // Edited by: Darius Tan & Franky Laurentis
 //************************************************************************************************************************************//
 #include <deque>
-#include <queue>
 #include <set>
-#include <unordered_set>
 #include <boost/unordered_set.hpp>
-// #include <boost/functional/hash.hpp>
 #include <math.h>
-// #include <iomanip>
-// #include <iostream>
 
 typedef std::pair<int,int> coord;
+
+//*********************************************************//
+//**************** DEFINE ALGO CHOICE HERE ****************//
+// ALGO 0 - Flood Fill
+// ALGO 1 - A*
+
+#define ALGO 1
+//*********************************************************//
 
 #define STOP 0
 #define UP 1
@@ -40,7 +43,10 @@ typedef struct{
     bool wallDown;
     bool wallLeft;
     bool wallRight;
-    
+
+    // For FF
+    int value;
+
     coord neighbourUp;
     coord neighbourDown;
     coord neighbourLeft;
@@ -65,29 +71,6 @@ int numCol = GRID_COL_Y_MAX;
 //	|						//      +       -
 //  ------> X				//      3.14 -3.14
 
-// This function is to test the moving grid motion for World 1.
-coord pathfinder(coord curCoord, coord goalCoord) {
-    coord nextCoord;
-    //Hardcoding to goal
-    if (curCoord.first == 0 && curCoord.second == 0) 
-        nextCoord = std::make_pair(0,1);
-    else if (curCoord.first == 0 && curCoord.second == 1) 
-        nextCoord = std::make_pair(1,1);
-    else if (curCoord.first == 1 && curCoord.second == 1) 
-        nextCoord = std::make_pair(1,2);
-    else if (curCoord.first == 1 && curCoord.second == 2) 
-        nextCoord = std::make_pair(2,2);
-    else if (curCoord.first == 2 && curCoord.second == 2) 
-        nextCoord = std::make_pair(3,2);
-    else if (curCoord.first == 3 && curCoord.second == 2) 
-        nextCoord = std::make_pair(3,3);
-    else if (curCoord.first == 3 && curCoord.second == 3) 
-        nextCoord = std::make_pair(3,4);
-    else if (curCoord.first == 3 && curCoord.second == 4) 
-        nextCoord = std::make_pair(4,4);
-    return nextCoord;
-}
-
 int manhattanDist(coord start, coord end){
     int horiz = abs(start.first - end.first);
     int vert = abs(start.second - end.second);
@@ -96,6 +79,9 @@ int manhattanDist(coord start, coord end){
 
 class pathfinderAlgo{
   private:
+    //For FF
+    std::deque<coord> stackFF;
+
     boost::unordered_set<coord> openSet;
     boost::unordered_set<coord> closeSet;
   public:
@@ -103,6 +89,8 @@ class pathfinderAlgo{
     pathfinderAlgo() {
         closeSet.clear();
         openSet.clear();
+        //For FF
+        stackFF.clear();
         //create grid
         for (int i = 0; i < numRow; ++i) {
             for (int j = 0; j < numCol; ++j) {
@@ -140,14 +128,25 @@ class pathfinderAlgo{
 
                 grid[i][j].previous = std::make_pair(0, 0);
 
-                //FIXME: check g/f value comparison
-                grid[i][j].g = 1;
-                grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
-                grid[i][j].f = grid[i][j].g + grid[i][j].h;
+                if (ALGO == 1) { // aStar algo
+                    //FIXME: check g/f value comparison
+                    grid[i][j].g = 1;
+                    grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
+                    grid[i][j].f = grid[i][j].g + grid[i][j].h;
+                } else if (ALGO == 0) { // FF algo
+                    grid[i][j].value = 555;
+                    grid[i][j].g = 555;
+                    lastPos = OBCoord;
+                }
             }
         }
     }
-
+    //For FF
+    coord lastPos;
+    void setLastPosition(int x, int y){
+        lastPos = std::make_pair(x,y);
+        std::cout<< "Last Position: "<< lastPos.first << " , " << lastPos.second <<std::endl;
+    }
     void resetGrid() {
         closeSet.clear();
         openSet.clear();
@@ -155,12 +154,33 @@ class pathfinderAlgo{
             for (int j = 0; j < numCol; ++j) {
                 grid[i][j].previous = std::make_pair(0, 0);
 
-                //FIXME: check g/f value comparison
-                grid[i][j].g = 1;
-                grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
-                grid[i][j].f = grid[i][j].g + grid[i][j].h;
+                if (ALGO == 1) { // aStar algo
+                    //FIXME: check g/f value comparison
+                    grid[i][j].g = 1;
+                    grid[i][j].h = manhattanDist(grid[i][j].pos, goalCoord);
+                    grid[i][j].f = grid[i][j].g + grid[i][j].h;
+                } else if (ALGO == 0) {  // FF algo
+                    grid[i][j].value = 555;
+                    grid[i][j].g = 555;
+                }
             }
         }
+    }
+    //For FF
+    void updateSurroundingWall(coord focusCoordinate){
+    	cell focus = grid[focusCoordinate.first][focusCoordinate.second];
+
+    	cell &focusUp = grid[focus.neighbourUp.first][focus.neighbourUp.second];
+    	if (focusUp.wallDown == false && focusUp.value == 555) focusUp.value = focus.value + 1;
+
+    	cell &focusDown = grid[focus.neighbourDown.first][focus.neighbourDown.second];
+    	if (focusDown.wallUp == false && focusDown.value == 555) focusDown.value = focus.value + 1;
+
+    	cell &focusRight = grid[focus.neighbourRight.first][focus.neighbourRight.second];
+    	if (focusRight.wallLeft == false && focusRight.value == 555) focusRight.value = focus.value + 1;
+
+    	cell &focusLeft = grid[focus.neighbourLeft.first][focus.neighbourLeft.second];
+    	if (focusLeft.wallRight == false && focusLeft.value == 555) focusLeft.value = focus.value + 1;
     }
 
     void updateWall(coord curCoord, int wallDirection, bool hasWall){
@@ -231,6 +251,102 @@ class pathfinderAlgo{
         return (testCoord.first >= 0) && (testCoord.first < GRID_ROW_X_MAX) 
         && (testCoord.second >= 0) && (testCoord.second < GRID_ROW_X_MAX);
     }
+
+    //For FF
+    coord floodFill(coord pointCoord) {
+        std::cout << "********* Start Floodfill *********" << std::endl;
+        //current position = starting position
+        int startX = pointCoord.first;
+        int startY = pointCoord.second;
+
+        //setup grid value for goal = 0
+        grid[goalCoord.first][goalCoord.second].value = 0;
+
+        //a stack, push goal coordinates to the back of the stack
+        stackFF.push_back(goalCoord);
+
+        coord start, up, down, right, left;
+
+        while (!stackFF.empty()) { //stack is not empty
+            cell spot = grid[stackFF.front().first][stackFF.front().second];
+
+            up = spot.neighbourUp;
+            down = spot.neighbourDown;
+            right = spot.neighbourRight;
+            left = spot.neighbourLeft;
+
+            if (spot.wallUp == false && up.first < 9 && grid[up.first][up.second].value == 555)
+                stackFF.push_back(up);
+            if (spot.wallRight == false && right.second < 9 && grid[right.first][right.second].value == 555)
+                stackFF.push_back(right);
+            if (spot.wallDown == false && down.first >= 0 && grid[down.first][down.second].value == 555)
+                stackFF.push_back(down);
+            if (spot.wallLeft == false && left.second >= 0 && grid[left.first][left.second].value == 555)
+                stackFF.push_back(left);
+
+            updateSurroundingWall(stackFF.front());
+            stackFF.pop_front();
+        }
+
+        grid[lastPos.first][lastPos.second].value = 100;
+        start = std::make_pair(startX, startY);
+        // return nextGrid(start);
+
+        coord next; //, current;
+        next = start;
+        cell focus = grid[start.first][start.second];
+        int lowest = 555;
+        int verdict = 0;
+
+        //check least value only - choose up, right, down, left in that order
+        //check left
+        if (start.first - 1 >= 0 && !focus.wallLeft && grid[start.first - 1][start.second].value <= lowest) { //gridMatrix[next.x][next.y].value){
+            next = std::make_pair(start.first - 1, start.second);
+            lowest = grid[start.first - 1][start.second].value;
+            verdict = LEFT;
+        }
+        //check down
+        if (start.second - 1 >= 0 && !focus.wallDown && grid[start.first][start.second - 1].value <= lowest) { //gridMatrix[next.x][next.y].value){
+            next = std::make_pair(start.first, start.second - 1);
+            lowest = grid[start.first][start.second - 1].value;
+            verdict = DOWN;
+        }
+        //check right
+        if (start.first + 1 < numCol && !focus.wallRight && grid[start.first][start.second + 1].value <= lowest) { //gridMatrix[next.x][next.y].value){
+            next = std::make_pair(start.first + 1, start.second);
+            lowest = grid[start.first + 1][start.second + 1].value;
+            verdict = RIGHT;
+        }
+        //check up
+        if (start.second + 1 < numRow && !focus.wallUp && grid[start.first + 1][start.second].value <= lowest) { //gridMatrix[next.x][next.y].value){
+            next = std::make_pair(start.first, start.second + 1);
+            lowest = grid[start.first][start.second + 1].value;
+            verdict = UP;
+        }
+        std::cout << "verdict: " << verdict << std::endl;
+        //this part converts "verdict" into next coord for output
+        coord nextCoord;
+        switch (verdict) {
+            case UP: //go up
+                nextCoord.first = pointCoord.first;
+                nextCoord.second = pointCoord.second + 1;
+                break;
+            case RIGHT: //go right
+                nextCoord.first = pointCoord.first + 1;
+                nextCoord.second = pointCoord.second;
+                break;
+            case DOWN: //go down
+                nextCoord.first = pointCoord.first;
+                nextCoord.second = pointCoord.second - 1;
+                break;
+            case LEFT: //go left
+                nextCoord.first = pointCoord.first - 1;
+                nextCoord.second = pointCoord.second;
+                break;
+        }
+        return nextCoord;
+    }
+
     coord aStar(coord pointCoord){
         //full algo
         std::cout << "********* Start AStar *********" << std::endl;
