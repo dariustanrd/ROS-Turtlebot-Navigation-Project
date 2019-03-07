@@ -1,8 +1,0 @@
-prefix=/home/darius/ROS_Workspaces/proj1_ws/install
-
-Name: bot
-Description: Description of bot
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/darius/ROS_Workspaces/proj1_ws/install/lib 
-Requires: 
