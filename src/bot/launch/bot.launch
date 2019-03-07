@@ -10,8 +10,8 @@
         <param name="vo_used" value="false"/>
     </node>
 
-    <node pkg="bot" type="pos_info" name="pos_info" ns="manual_ctrl"/>
-    <node pkg="bot" type="depth_info" name="depth_info" ns="manual_ctrl"/>
-    <node pkg="bot" type="scan_info" name="scan_info" ns="manual_ctrl"/>
-    <node pkg="bot" type="bot_control" name="bot_control" ns="manual_ctrl" output="screen"/>
+    <node pkg="bot" type="pos_info" name="pos_info" ns="auto_ctrl"/>
+    <node pkg="bot" type="depth_info" name="depth_info" ns="auto_ctrl"/>
+    <node pkg="bot" type="scan_info" name="scan_info" ns="auto_ctrl"/>
+    <node pkg="bot" type="bot_control" name="bot_control" ns="auto_ctrl" output="screen"/>
 </launch>

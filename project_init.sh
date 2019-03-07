@@ -6,7 +6,7 @@
 sudo cp ./worlds/test_world_2.world /opt/ros/kinetic/share/turtlebot_gazebo/worlds/
 export TURTLEBOT_GAZEBO_WORLD_FILE="/opt/ros/kinetic/share/turtlebot_gazebo/worlds/test_world_2.world"
 
-# For Deadend testing world
+# For Dead end testing world
 # sudo cp ./worlds/test_world_trap.world /opt/ros/kinetic/share/turtlebot_gazebo/worlds/
 # export TURTLEBOT_GAZEBO_WORLD_FILE="/opt/ros/kinetic/share/turtlebot_gazebo/worlds/test_world_trap.world"
 

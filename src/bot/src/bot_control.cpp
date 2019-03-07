@@ -63,7 +63,7 @@ class BotController
     double posX, posY;
     double yaw;
     double depth;
-    double laserL, laserM, laserR;
+    double laserL, laserR;
 
     bool preemptedWall;
     int numMoves;
@@ -85,7 +85,6 @@ class BotController
         yaw_cmd = 0;
         depth = MAX_DEPTH;
         laserL = MAX_DEPTH;
-        laserM = MAX_DEPTH;
         laserR = MAX_DEPTH;
         preemptedWall = false;
         reachedGoalOnce = false;
@@ -109,9 +108,8 @@ class BotController
 
     void laserCallback(const std_msgs::Float64MultiArray::ConstPtr& laser_data) {
         laserL = laser_data -> data[0];
-        laserM = laser_data -> data[1];
         laserR = laser_data -> data[2];
-        // std::cout << "laserL: " << laserL << "laserM: " << laserM << "laserR: " << laserR << std::endl;
+        // std::cout << "laserL: " << laserL << "laserR: " << laserR << std::endl;
     }
 
     void depthCallback(const std_msgs::Float64::ConstPtr& depth_data) {

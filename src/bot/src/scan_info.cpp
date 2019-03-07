@@ -68,14 +68,13 @@ class depthScanner {
 				send_mid = MAX_DEPTH;
 			if (std::isnan(scan_right))
 				send_right = MAX_DEPTH;
-			scanHistLeft.push_back(send_left); //testing
-			scanHistMid.push_back(send_mid); //testing
-			scanHistRight.push_back(send_right); //testing
+			scanHistLeft.push_back(send_left);
+			scanHistMid.push_back(send_mid);
+			scanHistRight.push_back(send_right);
 		}
 		else {
 			if (std::isnan(scan_left)) {
-				// if (send_left >= 2.0) //if was previously increasing
-				if (*scanHistLeft.begin() < *scanHistLeft.rbegin())
+				if (*scanHistLeft.begin() < *scanHistLeft.rbegin()) //if was previously increasing
 					send_left = MAX_DEPTH;
 				else if (*scanHistLeft.begin() == *scanHistLeft.rbegin())
 					send_left = send_left;
@@ -106,13 +105,13 @@ class depthScanner {
 			} 
 			else
 				send_right = scan_right;
-			scanHistLeft.pop_front(); //testing
-			scanHistMid.pop_front(); //testing
-			scanHistRight.pop_front(); //testing
+			scanHistLeft.pop_front();
+			scanHistMid.pop_front();
+			scanHistRight.pop_front();
 
-			scanHistLeft.push_back(send_left); //testing
-			scanHistMid.push_back(send_mid); //testing
-			scanHistRight.push_back(send_right); //testing
+			scanHistLeft.push_back(send_left);
+			scanHistMid.push_back(send_mid);
+			scanHistRight.push_back(send_right);
 		}
 		startup = false;
 		std::cout << "Send Left: " << send_left << " Send Mid: " << send_mid << " Send Right: " << send_right << std::endl;
