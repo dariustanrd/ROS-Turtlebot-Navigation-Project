@@ -9,6 +9,8 @@
 | Operating System | [Ubuntu 16.04 LTS (Xenial Xerus)](http://releases.ubuntu.com/16.04/) |
 | ROS Distribution Release | [Kinetic Kame](http://wiki.ros.org/kinetic/Installation/Ubuntu)*|
 | C++ Version | At least C++11 |
+
+
 *Note: Ensure ROS Kinetic Kame is installed with the `Desktop-Full` option. The `ros-kinetic-turtlebot` package is required as well.
 
 ## Setup & Configuration
