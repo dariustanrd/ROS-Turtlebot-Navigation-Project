@@ -417,13 +417,11 @@ class pathfinderAlgo{
                 //     std::cout << it2->first << " " << it2->second << std::endl;
                 // }
                 if(!closeSet.count(neighbours[i])) {
-                    //FIXME: check g/f value comparison
                     int temp = spot.g + manhattanDist(currentCoord, neighbours[i]);
                     bool newPath = false;
                     // std::cout << "Neighbour coord: " << neighbours[i].first << " " << neighbours[i].second << std::endl;
                     if (openSet.find(neighbours[i]) != openSet.end()) {
                         // std::cout << "Neighbour found in openSet: " <<  neighbours[i].first << " " << neighbours[i].second  << std::endl;
-                        //FIXME: check g/f value comparison
                         if (temp < grid[neighbours[i].first][neighbours[i].second].g) {
                             // std::cout << "Current f score < neighbour g score" << std::endl;
                             grid[neighbours[i].first][neighbours[i].second].g = temp;

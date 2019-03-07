@@ -150,12 +150,6 @@ class BotController
                     yaw_cmd = -YAW_VEL_CORRECTION;
                 }
             }
-            // if (yaw <= 0) {
-            //     yaw_cmd = YAW_VEL_CORRECTION; //ACW
-            // }
-            // else if (yaw > 0) {
-            //     yaw_cmd = -YAW_VEL_CORRECTION; //CW
-            // }
             break;
         case DOWN:
             if (initY - posY < MOVE_DIST) {
@@ -172,14 +166,6 @@ class BotController
                     yaw_cmd = YAW_VEL_CORRECTION;
                 }
             }
-            // // if (yaw > 0 && yaw <= PI) {
-            // if (yaw > 0) {
-            //     yaw_cmd = YAW_VEL_CORRECTION;
-            // }
-            // // else if (yaw < 0 && yaw > -PI) {
-            // else if (yaw < 0) {
-            //     yaw_cmd = -YAW_VEL_CORRECTION;
-            // }
             break;
         case LEFT:
             if (initX - posX < MOVE_DIST) {
@@ -196,12 +182,6 @@ class BotController
                     yaw_cmd = -YAW_VEL_CORRECTION;
                 }
             }
-            // if (yaw <= PI / 2) {
-            //     yaw_cmd = YAW_VEL_CORRECTION;
-            // }
-            // else if (yaw > PI / 2) {
-            //     yaw_cmd = -YAW_VEL_CORRECTION;
-            // }
             break;
         case RIGHT:
             if (posX - initX < MOVE_DIST) {
@@ -218,12 +198,6 @@ class BotController
                     yaw_cmd = YAW_VEL_CORRECTION;
                 }
             }
-            // if (yaw <= -PI / 2) {
-            //     yaw_cmd = YAW_VEL_CORRECTION;
-            // }
-            // else if (yaw > -PI / 2) {
-            //     yaw_cmd = -YAW_VEL_CORRECTION;
-            // }
             break;
         default:
             break;
@@ -235,7 +209,7 @@ class BotController
         }
         cmd.angular.z = yaw_cmd;
         cmd.linear.x = linear_cmd;
-        cmd_pub.publish(cmd); //publish to robot
+        cmd_pub.publish(cmd);
     }
 
     bool checkFace (int direction) {
@@ -317,12 +291,11 @@ class BotController
                 break;
         }
         cmd.angular.z = yaw_cmd;
-        cmd_pub.publish(cmd); //publish to robot
+        cmd_pub.publish(cmd);
     }
 
     coord getCoord(double posX, double posY) {
-        coord curCoord (myRound(posX), myRound(posY)); //might need to change the rounding to a higher threshold. - might stop too soon
-        // coord curCoord (posX, posY);
+        coord curCoord (myRound(posX), myRound(posY));
         return curCoord;
     }
 
@@ -374,22 +347,6 @@ class BotController
     }
 
     void preemptWall(int direction) {
-        //FIXME: Currently doesnt work for the very first coord to move towards.
-
-        // if moved halfway between the coordinates & preempted == false;
-            // preempted = true; // to make it run only once when halfway between coordinates.
-            // if current face UP
-                // if laser left < 1, updateWall(nextCoord, LEFT)
-                // if laser right < 1, updateWall(nextCoord, RIGHT)
-            // if current face DOWN
-                // if laser left < 1, updateWall(nextCoord, RIGHT)
-                // if laser right < 1, updateWall(nextCoord, LEFT)
-            // if current face LEFT
-                // if laser left < 1, updateWall(nextCoord, DOWN)
-                // if laser right < 1, updateWall(nextCoord, UP)
-            // if current face RIGHT
-                // if laser left < 1, updateWall(nextCoord, UP)
-                // if laser right < 1, updateWall(nextCoord, DOWN)
         // then when it reaches the next coord and runs aStar again, it will realise there is a wall somewhere without turning towards it.
         
         // std::cout << "Preempting wall along direction: " << direction << std::endl;
@@ -397,14 +354,12 @@ class BotController
             case UP:
             // std::cout << "In case UP" << std::endl;
                 if (laserL <= 1) {
-                    // std::cout << "In laserL <=1" << std::endl;
                     algo.updateWall(nextCoord, LEFT, true);
                     // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
                 } else { 
                     algo.updateWall(nextCoord, LEFT, false);
                 }
                 if (laserR <= 1) {
-                    // std::cout << "In laserR <=1" << std::endl;
                     algo.updateWall(nextCoord, RIGHT, true);
                     // std::cout << "Updated wall for coord: " << nextCoord.first << "," << nextCoord.second << std::endl;
                 } else { 
@@ -468,7 +423,6 @@ class BotController
             initY = posY;
             movedFlag = false;
         }
-        // curCoord = getCoord(posX, posY);
         int nextStep;
         algo.resetGrid();
 
@@ -511,7 +465,6 @@ class BotController
                 //clear path
                 // std::cout << "Path Clear" << std::endl;
                 moveStr(nextStep);
-                //FIXME: only run preemptive wall detection for 2nd move onwards. -- 1st move detects wrongly -> maybe cos of not being centred in grid at start? 
                 // if (!preemptedWall && movedDistance(nextStep, 0.5) && numMoves != 0) {
                 if (!preemptedWall && movedDistance(nextStep, 0.5)) {
                     preemptWall(nextStep); //update wall pre-emptively while moving between coordinates.
@@ -519,9 +472,8 @@ class BotController
                 }
             } else {
                 std::cout << "=========================== Path Blocked ===========================" << std::endl;
-                //FIXME: Check this
                 if (checkBotReached(posX,posY,nextCoord)){ //if reached
-                    moveStr(STOP); //with aStar should stop? but should continue to the intended coord if not yet there?
+                    moveStr(STOP);
                 } else {
                     moveStr(nextStep); // continue moving to the coordinate
                 }
