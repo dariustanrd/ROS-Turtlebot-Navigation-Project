@@ -1,7 +1,7 @@
 # Turtlebot Autonomous Navigation in ROS Gazebo
-<div align="center">
+<!-- <div align="center">
   <img src="imagelink"><br><br>
-</div>
+</div> -->
 
 ## System requirements
 | **System** | **Version / Release** |
@@ -13,7 +13,10 @@
 
 *Note: Ensure ROS Kinetic Kame is installed with the `Desktop-Full` option. The `ros-kinetic-turtlebot` package is required as well.
 
-## Setup & Configuration
+## Overview
+This project is ...
+
+## Setup & configuration
 
 ### Setting up this repository with a **new** catkin workspace
 
@@ -56,10 +59,11 @@
     $ catkin_make
     ```
 
-
 ## Running the code
 
-### Start the Gazebo environment:
+### Starting the Gazebo environment:
+
+To initialise the Gazebo world, run the following commands in a terminal:
 
 ```shell
 $ source devel/setup.bash
@@ -67,30 +71,41 @@ $ chmod +x project_init.sh
 $ ./project_init.sh
 ```
 
-### Start automous navigation to goal:
+### Starting autonomous navigation to goal:
+In a new terminal, run the following commands to begin the Turtlebot autonomous navigation.
+
 ```shell
 $ source devel/setup.bash
 $ roslaunch bot bot.launch
 ```
+When the Turtlebot has reached the goal coordinates, the notification will be printed out on the terminal together with the time taken to reach the goal.
+
 -----------------
 
+## Code analysis & explanations
 
-## Section 1
-### Subsection
-*italics*
+### Nodes
+There are 4 main nodes that we wrote for this package which handles different aspects of the autonomous navigation of the Turtlebot.
 
-**bold**
+1. `pos_info.cpp`
+   
+   This node
 
-using `inline code`
+2. `depth_info.cpp`
+   
+   This node
 
-```shell
-$ python
-```
+3. `scan_info.cpp`
+   
+   This node
 
-[link name](linkhere)
+4. `bot_control.cpp`
+   
+   This node
 
-![image name](image.jpg)
+### Algorithm file `algo.h`
+This file contains 2 algorithms, Flood Fill as well as A*.
 
-## Section 2
+### Launch files
 
-## Section 3
+### World selection
