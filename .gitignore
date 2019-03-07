@@ -1,2 +1,5 @@
+/build/*
+/devel/*
+/src/CMakeLists.txt
 *.code-workspace
 *.vscode
