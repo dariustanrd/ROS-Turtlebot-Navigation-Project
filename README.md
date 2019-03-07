@@ -3,8 +3,7 @@
   <img src="imagelink"><br><br>
 </div> -->
 
-### System requirements
-| **System** | **Version / Release** |
+| **System Requirements** | **Version / Release** |
 |-----------------|-----------|
 | Operating System | [Ubuntu 16.04 LTS (Xenial Xerus)](http://releases.ubuntu.com/16.04/) |
 | ROS Distribution Release | [Kinetic Kame](http://wiki.ros.org/kinetic/Installation/Ubuntu)*|
