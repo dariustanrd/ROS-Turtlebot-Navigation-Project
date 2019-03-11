@@ -26,12 +26,10 @@ private:
 
 public:
 	InfoReader(ros::NodeHandle &nh){
-		// pos_sub = nh.subscribe("/odom",1, &InfoReader::callback, this);
 		pos_sub = nh.subscribe("/robot_pose_ekf/odom_combined",1, &InfoReader::callback, this);
 		pos_info = nh.advertise< std_msgs::Float64MultiArray >("pos_info", 1);
 	}
 
-	// void callback( const nav_msgs::OdometryConstPtr& poseMsg){
 	void callback( const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& poseMsg){
 		// Changed positive pose on map:
 		//  Y
@@ -43,8 +41,6 @@ public:
 		double posY = poseMsg->pose.pose.position.x;
 
 		// Quartenion processing
-        // Use the turner.cpp quartenion processing methods than navigator.cpp (*2.19 hardcode)
-        // Don't really need x, y, w orientations, only can rotate in z
 		double quatX= poseMsg->pose.pose.orientation.x;
         double quatY= poseMsg->pose.pose.orientation.y;
         double quatZ= poseMsg->pose.pose.orientation.z;
@@ -52,7 +48,6 @@ public:
     	tf::Quaternion q(quatX, quatY, quatZ, quatW);
 		tf::Matrix3x3 m(q);
 		double yaw, pitch, roll;
-        // Don't need roll and pitch, just take yaw.
     	m.getRPY(roll, pitch, yaw);
 
     	position.data.resize(3);

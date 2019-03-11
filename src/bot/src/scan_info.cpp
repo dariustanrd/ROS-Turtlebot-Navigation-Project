@@ -28,9 +28,9 @@ class depthScanner {
 
 		bool startup;
 
-		std::deque<float> scanHistLeft; //testing
-		std::deque<float> scanHistMid; //testing
-		std::deque<float> scanHistRight; //testing
+		std::deque<float> scanHistLeft;
+		std::deque<float> scanHistMid;
+		std::deque<float> scanHistRight;
 
 	public:
     depthScanner(ros::NodeHandle &nh){
@@ -84,7 +84,6 @@ class depthScanner {
 			else
 				send_left = scan_left;
 			if (std::isnan(scan_mid)) {
-				// if (send_mid >= 2.0)
 				if (*scanHistMid.begin() < *scanHistMid.rbegin())
 					send_mid = MAX_DEPTH;
 				else if (*scanHistMid.begin() == *scanHistMid.rbegin())
@@ -95,7 +94,6 @@ class depthScanner {
 			else
 				send_mid = scan_mid;
 			if (std::isnan(scan_right)) {
-				// if (send_right >= 2.0)
 				if (*scanHistRight.begin() < *scanHistRight.rbegin())
 					send_right = MAX_DEPTH;
 				else if (*scanHistRight.begin() == *scanHistRight.rbegin())

@@ -12,7 +12,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Odometry.h>
-//#include "/home/willson/catkin_workspace/devel/include/cmd_vel_msgs/status.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -30,58 +29,12 @@
 #include <string>
 #include <math.h>
 #include <std_msgs/Float64.h>
-#include <tr1/tuple> // if gcc > 4.7 need to use #include <tuple> // std::tuple, std::make_tuple, std::tie
-
-// namespace patch{
-//     template < typename T > std::string to_string(const T& n){
-//         std::ostringstream stm;
-//         stm << n;
-//         return stm.str();
-//     }
-// }
+#include <tr1/tuple>
 
 namespace enc = sensor_msgs::image_encodings;
  
 static const char WINDOW[] = "RGB Camera";
 static const char dWINDOW[] = "Depth Camera";
-// static const char gWINDOW[] = "Canny image";
-
-//********************** For Edge Detection **********************//
-
-// std::tr1::tuple<cv::Mat, std::vector<float>> computeVLines(cv::Mat imageMat_after)
-// {
-//     cv::Mat err, gimageMat_canny, imageMat_canny;
-//     std::vector<float> Pt;
-//     std::tr1::tuple<cv::Mat, std::vector<float>> cannyReturn;
-
-//     Canny(imageMat_after, gimageMat_canny, 7, 40, 3);
-//     cvtColor(gimageMat_canny, imageMat_canny, CV_GRAY2BGR);
-
-//     cv::imshow("Canny Image", gimageMat_canny);
-
-//     std::vector<cv::Vec2f> lines;
-//     HoughLines(gimageMat_canny, lines, 1, CV_PI / 180, 100);
-
-//     for (size_t i = 0; i < lines.size(); i++)
-//     {
-//         float rho = lines[i][0];
-//         float theta = lines[i][1];
-//         if (theta == 0)
-//         {
-//             double a = cos(theta), b = sin(theta);
-//             double x0 = a * rho, y0 = b * rho;
-
-//             cv::Point pt1(cvRound(x0 + 1000 * (-b)), cvRound(y0 + 1000 * (a)));
-//             cv::Point pt2(cvRound(x0 - 1000 * (-b)), cvRound(y0 - 1000 * (a)));
-
-//             line(imageMat_canny, pt1, pt2, cv::Scalar(0, 0, 255), 2, 8);
-//             Pt.push_back(pt1.x);
-//         }
-//     }
-
-//     cannyReturn = std::tr1::make_tuple(imageMat_canny, Pt);
-//     return (cannyReturn);
-// }
 
 //********************** Image Converter Class **********************//
 
@@ -90,7 +43,7 @@ class ImageConverter
   private:
     ros::NodeHandle nh_;
     image_transport::ImageTransport it_;
-    ros::Publisher depth_pub; //added this
+    ros::Publisher depth_pub;
 
     typedef image_transport::SubscriberFilter ImageSubscriber;
     ImageSubscriber rgb_image_sub_, depth_image_sub_;
@@ -137,7 +90,7 @@ class ImageConverter
             return;
         }
         // To get the depth at the optical centre (320,240)px
-        std_msgs::Float64 msg; //std_msgs::Float64MultiArray depth; //can use multiarray to send instead
+        std_msgs::Float64 msg;
         msg.data = cv_ptr->image.at<float>(320, 240);
         
         // Publisher format -->
@@ -146,7 +99,7 @@ class ImageConverter
         std::cout << " depth at centre " << cv_ptr->image.at<float>(320, 240) << std::endl;
 
         cv::imshow(dWINDOW, cv_ptr->image);
-        // cv::moveWindow(dWINDOW, 730, 20); // makes the window unable to move
+        
         /*
          *  For displaying RGB images
          */
@@ -161,57 +114,6 @@ class ImageConverter
         }
 
         cv::imshow(WINDOW, cv_ptr->image);
-        // cv::moveWindow(WINDOW, 20, 20); // makes the window unable to move
-        /*
-         *  To identify the vertical edges in the RGB image
-         */
-        // rgbImageMat = cv_ptr->image;
-
-        // std::tr1::tuple<cv::Mat, std::vector<float>> cannyReturn;
-        // std::vector<float> pointReturn;
-
-        // cv::Size rgb_size_ = rgbImageMat.size();
-
-        // if (rgb_size_.height > 0 && rgb_size_.width > 0)
-        // {
-        //     cannyReturn = computeVLines(rgbImageMat);
-        //     std::tr1::tie(imageMat_canny, pointReturn) = cannyReturn;
-
-        //     if (pointReturn.size() > 0)
-        //     {
-        //         std::vector<float> big, small;
-        //         big_f = 640;
-        //         small_l = 0;
-
-        //         for (int i = 0; i < pointReturn.size(); i++)
-        //         {
-
-        //             if (pointReturn[i] > 320)
-        //             {
-        //                 big.push_back(pointReturn[i]);
-        //             }
-        //             else
-        //             {
-        //                 small.push_back(pointReturn[i]);
-        //             }
-        //         }
-        //         if (big.size() > 0)
-        //         {
-        //             sort(big.begin(), big.end());
-        //             // big_f = big[0];
-        //             big_f = big[big.size() - 1];
-        //         }
-        //         if (small.size() > 0)
-        //         {
-        //             sort(small.begin(), small.end());
-        //             //small_l = small[small.size()-1];
-        //             small_l = small[0];
-        //         }
-        //     }
-        //     std::cout << "Right edge " << big_f << " "
-        //               << " Left edge " << small_l << std::endl;
-        // }
-
 
         cv::waitKey(3);
     }
