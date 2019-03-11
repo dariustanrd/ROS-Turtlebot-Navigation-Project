@@ -15,7 +15,7 @@
 ## Overview
 This project is part of the module EE4308 - Advances in Intelligent Systems and Robotics in the National University of Singapore. The goal of this project is to design an autonomous navigation system for the Turtlebot in the Gazebo environment using ROS, which includes pathfinding as well as obstacle avoidance in a grid like maze world.
 
-For our project, we implemented both the A* search algorithm as our pathfinding tool to plan for the Turtlebot's path to goal depending on the obstacles detected by its on-board RGB-D Kinect sensor. Our system is robust enough to handle both known and unknown worlds as long as the start and end coordinates remain the same at `(0, 0)` and `(4, 4)` respectively.
+For our project, we implemented the A* search algorithm as our pathfinding tool to plan for the Turtlebot's path to goal depending on the obstacles detected by its on-board RGB-D Kinect sensor. Our system is robust enough to handle both known and unknown worlds as long as the start and end coordinates remain the same at `(0, 0)` and `(4, 4)` respectively.
 
 ## Setup & configuration
 
